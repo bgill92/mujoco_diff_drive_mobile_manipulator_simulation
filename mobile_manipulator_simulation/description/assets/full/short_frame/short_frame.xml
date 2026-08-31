@@ -1,0 +1,60 @@
+<mujoco model="short_frame">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="material_short_frame_0" specular="0.20000000000000004" shininess="1.0" rgba="0.13333333 0.18823529 0.40000000 1.0"/>
+    <material name="material_short_frame_1" specular="0.20000000000000004" shininess="1.0" rgba="0.96078431 0.60784314 0.00000000 1.0"/>
+    <material name="material_short_frame_2" specular="0.20000000000000004" shininess="1.0" rgba="0.96078431 0.96078431 0.96078431 1.0"/>
+    <material name="material_short_frame_3" specular="0.20000000000000004" shininess="1.0" rgba="0.96078431 0.61960784 0.00000000 1.0"/>
+    <material name="material_short_frame_4" specular="0.20000000000000004" shininess="1.0" rgba="1.00000000 0.00000000 0.00000000 1.0"/>
+    <material name="material_short_frame_5" specular="0.20000000000000004" shininess="1.0" rgba="0.94509804 0.91372549 0.01176471 1.0"/>
+    <material name="material_short_frame_6" specular="0.20000000000000004" shininess="1.0" rgba="0.14901961 0.65490196 0.05882353 1.0"/>
+    <material name="material_short_frame_7" specular="0.20000000000000004" shininess="1.0" rgba="0.65098039 0.67450980 0.68627451 1.0"/>
+    <material name="material_short_frame_8" specular="0.20000000000000004" shininess="1.0" rgba="0.95686275 0.95686275 0.95686275 1.0"/>
+    <material name="material_short_frame_9" specular="0.20000000000000004" shininess="1.0" rgba="0.20000000 0.20000000 0.20000000 1.0"/>
+    <material name="material_short_frame_10" specular="0.20000000000000004" shininess="1.0" rgba="0.41176471 0.41176471 0.41176471 1.0"/>
+    <mesh file="short_frame_0.obj"/>
+    <mesh file="short_frame_1.obj"/>
+    <mesh file="short_frame_2.obj"/>
+    <mesh file="short_frame_3.obj"/>
+    <mesh file="short_frame_4.obj"/>
+    <mesh file="short_frame_5.obj"/>
+    <mesh file="short_frame_6.obj"/>
+    <mesh file="short_frame_7.obj"/>
+    <mesh file="short_frame_8.obj"/>
+    <mesh file="short_frame_9.obj"/>
+    <mesh file="short_frame_10.obj"/>
+  </asset>
+  <worldbody>
+    <body name="short_frame">
+      <geom mesh="short_frame_0" material="material_short_frame_10" class="visual"/>
+      <geom mesh="short_frame_1" material="material_short_frame_9" class="visual"/>
+      <geom mesh="short_frame_2" material="material_short_frame_8" class="visual"/>
+      <geom mesh="short_frame_3" material="material_short_frame_7" class="visual"/>
+      <geom mesh="short_frame_4" material="material_short_frame_6" class="visual"/>
+      <geom mesh="short_frame_5" material="material_short_frame_5" class="visual"/>
+      <geom mesh="short_frame_6" material="material_short_frame_4" class="visual"/>
+      <geom mesh="short_frame_7" material="material_short_frame_3" class="visual"/>
+      <geom mesh="short_frame_8" material="material_short_frame_2" class="visual"/>
+      <geom mesh="short_frame_9" material="material_short_frame_1" class="visual"/>
+      <geom mesh="short_frame_10" material="material_short_frame_0" class="visual"/>
+      <geom mesh="short_frame_0" class="collision"/>
+      <geom mesh="short_frame_1" class="collision"/>
+      <geom mesh="short_frame_2" class="collision"/>
+      <geom mesh="short_frame_3" class="collision"/>
+      <geom mesh="short_frame_4" class="collision"/>
+      <geom mesh="short_frame_5" class="collision"/>
+      <geom mesh="short_frame_6" class="collision"/>
+      <geom mesh="short_frame_7" class="collision"/>
+      <geom mesh="short_frame_8" class="collision"/>
+      <geom mesh="short_frame_9" class="collision"/>
+      <geom mesh="short_frame_10" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

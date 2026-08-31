@@ -1,0 +1,24 @@
+<mujoco model="robotiq_base">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="material_robotiq_base_0" specular="0.20000000000000004" shininess="1.0" rgba="0.03137255 0.03137255 0.03137255 1.0"/>
+    <material name="material_robotiq_base_1" specular="0.20000000000000004" shininess="1.0" rgba="0.80000000 0.80000000 0.80000000 1.0"/>
+    <mesh file="robotiq_base_0.obj"/>
+    <mesh file="robotiq_base_1.obj"/>
+  </asset>
+  <worldbody>
+    <body name="robotiq_base">
+      <geom mesh="robotiq_base_0" material="material_robotiq_base_1" class="visual"/>
+      <geom mesh="robotiq_base_1" material="material_robotiq_base_0" class="visual"/>
+      <geom mesh="robotiq_base_0" class="collision"/>
+      <geom mesh="robotiq_base_1" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

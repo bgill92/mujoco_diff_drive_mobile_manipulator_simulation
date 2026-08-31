@@ -1,0 +1,8 @@
+[submodule "rox"]
+	path = rox
+	url = git@github.com:bgill92/rox.git
+	branch = robotiq-gripper-support
+[submodule "mujoco_ros2_control"]
+	path = mujoco_ros2_control
+	url = git@github.com:ros-controls/mujoco_ros2_control.git
+	branch = main

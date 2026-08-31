@@ -1,0 +1,28 @@
+<mujoco model="diff_wheel">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="material_diff_wheel_0" specular="0.20000000000000004" shininess="1.0" rgba="0.81176471 0.30980392 0.00000000 1.0"/>
+    <material name="material_diff_wheel_1" specular="0.20000000000000004" shininess="1.0" rgba="0.89803922 0.89803922 0.89803922 1.0"/>
+    <material name="material_diff_wheel_2" specular="0.20000000000000004" shininess="1.0" rgba="0.81176471 0.80000000 0.82352941 1.0"/>
+    <mesh file="diff_wheel_0.obj"/>
+    <mesh file="diff_wheel_1.obj"/>
+    <mesh file="diff_wheel_2.obj"/>
+  </asset>
+  <worldbody>
+    <body name="diff_wheel">
+      <geom mesh="diff_wheel_0" material="material_diff_wheel_2" class="visual"/>
+      <geom mesh="diff_wheel_1" material="material_diff_wheel_1" class="visual"/>
+      <geom mesh="diff_wheel_2" material="material_diff_wheel_0" class="visual"/>
+      <geom mesh="diff_wheel_0" class="collision"/>
+      <geom mesh="diff_wheel_1" class="collision"/>
+      <geom mesh="diff_wheel_2" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

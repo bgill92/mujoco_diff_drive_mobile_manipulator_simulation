@@ -1,0 +1,8 @@
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+# ROS 2 colcon artifacts
+build/
+install/
+log/

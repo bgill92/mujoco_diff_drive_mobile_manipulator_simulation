@@ -1,0 +1,28 @@
+<mujoco model="cabinet_ac">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="material_cabinet_ac_0" specular="0.20000000000000004" shininess="1.0" rgba="0.74901961 0.74901961 0.74901961 1.0"/>
+    <material name="material_cabinet_ac_1" specular="0.20000000000000004" shininess="1.0" rgba="0.96078431 0.96078431 0.96078431 1.0"/>
+    <material name="material_cabinet_ac_2" specular="0.20000000000000004" shininess="1.0" rgba="0.13333333 0.18823529 0.40000000 1.0"/>
+    <mesh file="cabinet_ac_0.obj"/>
+    <mesh file="cabinet_ac_1.obj"/>
+    <mesh file="cabinet_ac_2.obj"/>
+  </asset>
+  <worldbody>
+    <body name="cabinet_ac">
+      <geom mesh="cabinet_ac_0" material="material_cabinet_ac_2" class="visual"/>
+      <geom mesh="cabinet_ac_1" material="material_cabinet_ac_1" class="visual"/>
+      <geom mesh="cabinet_ac_2" material="material_cabinet_ac_0" class="visual"/>
+      <geom mesh="cabinet_ac_0" class="collision"/>
+      <geom mesh="cabinet_ac_1" class="collision"/>
+      <geom mesh="cabinet_ac_2" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

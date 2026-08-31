@@ -1,0 +1,58 @@
+<mujoco_inputs>
+
+  <!-- Copied verbatim into the MJCF by the converter -->
+  <raw_inputs>
+    <!-- obj2mjcf emits geoms with class="visual"/"collision"; these defaults must exist. -->
+    <default>
+      <!-- Visual-only model: no geom collides. obj2mjcf leaves some geoms without a class,
+           which would otherwise fall back to MuJoCo's collidable global default. -->
+      <geom contype="0" conaffinity="0"/>
+      <default class="visual">
+        <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+      </default>
+      <default class="collision">
+        <geom group="3" type="mesh"/>
+      </default>
+    </default>
+
+    <!-- Replacements for the URDF <mimic> tags on the Robotiq 85 (MuJoCo ignores mimic).
+         polycoef second term = URDF mimic multiplier, offset 0. -->
+    <equality>
+      <joint joint1="robotiq_85_right_knuckle_joint"       joint2="robotiq_85_left_knuckle_joint" polycoef="0 -1 0 0 0" solimp="0.95 0.99 0.001" solref="0.005 1"/>
+      <joint joint1="robotiq_85_left_inner_knuckle_joint"  joint2="robotiq_85_left_knuckle_joint" polycoef="0 1 0 0 0"  solimp="0.95 0.99 0.001" solref="0.005 1"/>
+      <joint joint1="robotiq_85_right_inner_knuckle_joint" joint2="robotiq_85_left_knuckle_joint" polycoef="0 -1 0 0 0" solimp="0.95 0.99 0.001" solref="0.005 1"/>
+      <joint joint1="robotiq_85_left_finger_tip_joint"     joint2="robotiq_85_left_knuckle_joint" polycoef="0 -1 0 0 0" solimp="0.95 0.99 0.001" solref="0.005 1"/>
+      <joint joint1="robotiq_85_right_finger_tip_joint"    joint2="robotiq_85_left_knuckle_joint" polycoef="0 1 0 0 0"  solimp="0.95 0.99 0.001" solref="0.005 1"/>
+    </equality>
+
+    <!-- Position actuators; names = joint names so mujoco_ros2_control gets a direct 1:1 match.
+         Gripper: only the master joint — equality constraints drive the other 5. -->
+    <actuator>
+      <position name="ur5eshoulder_pan_joint"  joint="ur5eshoulder_pan_joint"  kp="4500" dampratio="1.0" ctrlrange="-6.2832 6.2832"/>
+      <position name="ur5eshoulder_lift_joint" joint="ur5eshoulder_lift_joint" kp="4500" dampratio="1.0" ctrlrange="-6.2832 6.2832"/>
+      <position name="ur5eelbow_joint"         joint="ur5eelbow_joint"         kp="3500" dampratio="1.0" ctrlrange="-3.1416 3.1416"/>
+      <position name="ur5ewrist_1_joint"       joint="ur5ewrist_1_joint"       kp="2000" dampratio="1.0" ctrlrange="-6.2832 6.2832"/>
+      <position name="ur5ewrist_2_joint"       joint="ur5ewrist_2_joint"       kp="2000" dampratio="1.0" ctrlrange="-6.2832 6.2832"/>
+      <position name="ur5ewrist_3_joint"       joint="ur5ewrist_3_joint"       kp="2000" dampratio="1.0" ctrlrange="-6.2832 6.2832"/>
+      <position name="robotiq_85_left_knuckle_joint" joint="robotiq_85_left_knuckle_joint" kp="100" dampratio="1.0" ctrlrange="0 0.8"/>
+    </actuator>
+  </raw_inputs>
+
+  <processed_inputs>
+    <!-- Joint damping + armature: actuator-internal damping saturates together with the P term
+         at the URDF effort limit (jnt_actfrcrange), causing a bang-bang limit cycle on the wrists.
+         Real joint damping is outside the clamp and kills the oscillation. -->
+    <modify_element type="joint" name="ur5eshoulder_pan_joint"  damping="10" armature="0.1"/>
+    <modify_element type="joint" name="ur5eshoulder_lift_joint" damping="10" armature="0.1"/>
+    <modify_element type="joint" name="ur5eelbow_joint"         damping="10" armature="0.1"/>
+    <modify_element type="joint" name="ur5ewrist_1_joint"       damping="5"  armature="0.1"/>
+    <modify_element type="joint" name="ur5ewrist_2_joint"       damping="5"  armature="0.1"/>
+    <modify_element type="joint" name="ur5ewrist_3_joint"       damping="5"  armature="0.1"/>
+    <modify_element type="joint" name="robotiq_85_left_knuckle_joint"        damping="0.1"/>
+    <modify_element type="joint" name="robotiq_85_right_knuckle_joint"       damping="0.1"/>
+    <modify_element type="joint" name="robotiq_85_left_inner_knuckle_joint"  damping="0.1"/>
+    <modify_element type="joint" name="robotiq_85_right_inner_knuckle_joint" damping="0.1"/>
+    <modify_element type="joint" name="robotiq_85_left_finger_tip_joint"     damping="0.1"/>
+    <modify_element type="joint" name="robotiq_85_right_finger_tip_joint"    damping="0.1"/>
+  </processed_inputs>
+</mujoco_inputs>
