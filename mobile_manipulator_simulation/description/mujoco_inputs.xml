@@ -35,6 +35,11 @@
       <position name="ur5ewrist_2_joint"       joint="ur5ewrist_2_joint"       kp="2000" dampratio="1.0" ctrlrange="-6.2832 6.2832"/>
       <position name="ur5ewrist_3_joint"       joint="ur5ewrist_3_joint"       kp="2000" dampratio="1.0" ctrlrange="-6.2832 6.2832"/>
       <position name="robotiq_85_left_knuckle_joint" joint="robotiq_85_left_knuckle_joint" kp="100" dampratio="1.0" ctrlrange="0 0.8"/>
+      <!-- Drive wheels for diff_drive_controller. The wheel bodies/joints come from the
+           URDF once it is exported with joint_type:=continuous; the freejoint and
+           base_support edits stay manual (see URDF_TO_MJCF_WALKTHROUGH.md). -->
+      <velocity name="wheel_left_joint"  joint="wheel_left_joint"  kv="50" ctrlrange="-30 30"/>
+      <velocity name="wheel_right_joint" joint="wheel_right_joint" kv="50" ctrlrange="-30 30"/>
     </actuator>
   </raw_inputs>
 

@@ -66,8 +66,8 @@ No colcon build needed: `PYTHONPATH` points at the package source so the script'
 - **Stage**: Pre-conversion analysis
 - **Symptom**: URDF references meshes as `meshes/ur_description/...` (no `package://`); the converter's `extract_mesh_info`/`trimesh.load` use the path verbatim, so it resolves relative to the process CWD, not the URDF location.
 - **Root cause**: Meshes were vendored next to the URDF with relative paths; the converter only rewrites `package://` and `file://` URIs.
-- **Fix**: Keep the working URDF copy in the same directory and always run the converter with CWD = `mobile_manipulator_simulation/description/`.
-- **Status**: worked around
+- **Fix (superseded)**: originally worked around by running the converter with CWD = `mobile_manipulator_simulation/description/`. The working copy now uses `package://mobile_manipulator_simulation/description/meshes/...` URIs (same form as the archived export) — the converter rewrites those to absolute paths itself, and RViz's RobotModel can resolve them (bare relative paths silently fail in RViz, which resolves against its own CWD).
+- **Status**: fixed
 
 ### Issue 2: Fake planar base chain — zero-inertia moving bodies + prismatic joints without limits
 - **Stage**: Pre-conversion analysis
@@ -144,7 +144,7 @@ No colcon build needed: `PYTHONPATH` points at the package source so the script'
   EOF
   ```
 
-- **Accepted limitations**: base welded to world; wheels/casters fixed; zero collision geometry (visual/actuation model — re-enable per-geom `contype`/`conaffinity` if contact physics is ever needed). For a future full ros2_control sim: regenerate the URDF from xacro with `include_arm_ros2_control:=true include_gripper_ros2_control:=true` (or hand-add the block per the `mobile_base.urdf` demo) — that block binds controllers to these MJCF actuators at runtime; the actuators themselves stay defined here.
+- **Accepted limitations**: casters fixed and visual-only (an anti-tip skid box stands in for them); collision geometry limited to the two wheel spheres + skid box (re-enable per-geom `contype`/`conaffinity` if more contact physics is ever needed). For a future full ros2_control sim: regenerate the URDF from xacro with `include_arm_ros2_control:=true include_gripper_ros2_control:=true` (or hand-add the block per the `mobile_base.urdf` demo) — that block binds controllers to these MJCF actuators at runtime; the actuators themselves stay defined here.
 
 ## Post-conversion step: floating base for mujoco_ros2_control
 
@@ -158,11 +158,32 @@ welds the URDF root, so this is a hand-edit of `mujoco_description_formatted.xml
      `/simulator/floating_base_state` automatically.
    - `<inertial pos="0 0 0.2" mass="90.0" diaginertia="3.0 3.0 5.0"/>` — the fused base
      geoms lost their URDF mass at `mj_saveLastXML` time.
-   - `<geom name="base_support" type="box" size="0.30 0.24 0.025" pos="0 0 0.025"
-     contype="0" conaffinity="1" condim="1" rgba="1 0 0 0" group="3"/>` — the only
-     colliding robot geom; rests frictionlessly on the floor so gravity cannot drop the
-     base while BaseVelocityPlugin's qvel override drives planar motion.
+   - `<geom name="base_support" type="box" size="0.30 0.24 0.025" pos="0 0 0.027"
+     contype="0" conaffinity="1" condim="1" rgba="1 0 0 0" group="3"/>` — frictionless
+     anti-tip skid standing in for the (visual-only) casters. Its bottom sits 2 mm above
+     the wheel-contact plane, so the driven wheels carry the weight; under pitch (arm
+     reaction forces, braking) a box edge touches and slides frictionlessly.
 2. `scene.xml`'s floor geom carries `condim="1"` too.
+
+### Driven wheels for diff_drive_controller
+
+Also required after every converter re-run **until** the URDF is re-exported with
+`joint_type:=continuous` (the rox xacro supports it — then the converter emits the wheel
+bodies/joints itself and only the collision spheres need re-adding):
+
+3. Carve the fused wheel visual geoms (at `0 ±0.317 0.075`) out of `base_link` into
+   `wheel_left_link` / `wheel_right_link` child bodies: hinge `axis="0 1 0"`
+   `damping="1" armature="0.05"`, `mass="5.0"`, plus an invisible collision sphere
+   `size="0.075" contype="0" conaffinity="1" condim="3" friction="1 0.005 0.0001"`
+   (mirrors the URDF collision sphere; floor-only contact like base_support). A
+   `condim="3"` wheel against the `condim="1"` floor is fine — contact condim is the
+   max, friction the elementwise max; the instability above only strikes with *zero*
+   friction coefficients at `condim="3"`.
+4. The `<velocity>` wheel actuators (`kv="50" ctrlrange="-30 30"`) come from
+   `mujoco_inputs.xml` and map 1:1 to the ros2_control velocity command interfaces.
+
+Regression check for all of the above: `pixi run python check_stability.py`
+(settle + drive/traction assertions).
 
    **Use `condim="1"` for frictionless, never `friction="0 0 0"` with the default
    `condim="3"`:** zero friction coefficients degenerate the pyramidal friction cone and

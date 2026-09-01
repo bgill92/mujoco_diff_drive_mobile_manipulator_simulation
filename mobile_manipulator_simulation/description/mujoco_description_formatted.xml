@@ -140,13 +140,13 @@
     <!-- POST-CONVERSION EDIT (see URDF_TO_MJCF_WALKTHROUGH.md): floating base for
          mujoco_ros2_control. Freejoint name matches odom_free_joint_name default so
          odometry publishes on /simulator/floating_base_state. Explicit inertial because
-         the fused base geoms lost their URDF mass at mj_saveLastXML time. The frictionless
-         support box rests on the (frictionless) floor so gravity cannot drop the base;
-         BaseVelocityPlugin's qvel override is the sole driver of planar motion. -->
+         the fused base geoms lost their URDF mass at mj_saveLastXML time. The driven
+         wheels carry the weight; the frictionless support box sits 2 mm above the
+         wheel-contact plane as an anti-tip skid (casters are visual-only). -->
     <body name="base_link" pos="0 0 0.002">
       <freejoint name="floating_base_joint"/>
       <inertial pos="0 0 0.2" mass="90.0" diaginertia="3.0 3.0 5.0"/>
-      <geom name="base_support" type="box" size="0.30 0.24 0.025" pos="0 0 0.025" contype="0" conaffinity="1" condim="1" rgba="1 0 0 0" group="3"/>
+      <geom name="base_support" type="box" size="0.30 0.24 0.025" pos="0 0 0.027" contype="0" conaffinity="1" condim="1" rgba="1 0 0 0" group="3"/>
       <body name="ur5eshoulder_link" pos="0.218 0 0.8685" quat="-1 0 0 0">
         <inertial pos="0 -0.00193 -0.02561" quat="0.560239 0.250606 -0.316559 0.72327" mass="3.761" diaginertia="0.00703079 0.0070003 0.00602478"/>
         <joint name="ur5eshoulder_pan_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-150 150" damping="10" armature="0.1"/>
@@ -334,18 +334,25 @@
       <geom mesh="diff_caster_0" class="collision" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
       <geom mesh="diff_caster_1" class="collision" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
       <geom mesh="diff_caster_2" class="collision" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-      <geom mesh="diff_wheel_0" material="material_diff_wheel_2" class="visual" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-      <geom mesh="diff_wheel_1" material="material_diff_wheel_1" class="visual" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-      <geom mesh="diff_wheel_2" material="material_diff_wheel_0" class="visual" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-      <geom mesh="diff_wheel_0" class="collision" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-      <geom mesh="diff_wheel_1" class="collision" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-      <geom mesh="diff_wheel_2" class="collision" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-      <geom mesh="diff_wheel_0" material="material_diff_wheel_2" class="visual" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
-      <geom mesh="diff_wheel_1" material="material_diff_wheel_1" class="visual" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
-      <geom mesh="diff_wheel_2" material="material_diff_wheel_0" class="visual" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
-      <geom mesh="diff_wheel_0" class="collision" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
-      <geom mesh="diff_wheel_1" class="collision" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
-      <geom mesh="diff_wheel_2" class="collision" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <!-- POST-CONVERSION EDIT (see URDF_TO_MJCF_WALKTHROUGH.md): driven wheels for
+           diff_drive_controller. Sphere collision r=0.075 mirrors the URDF collision
+           sphere; contype/conaffinity match base_support (floor-only contact). -->
+      <body name="wheel_left_link" pos="0 0.317 0.075">
+        <joint name="wheel_left_joint" axis="0 1 0" damping="1" armature="0.05"/>
+        <inertial pos="0 0 0" mass="5.0" diaginertia="0.011 0.011 0.011"/>
+        <geom name="wheel_left_collision" type="sphere" size="0.075" contype="0" conaffinity="1" condim="3" friction="1 0.005 0.0001" rgba="0 0 0 0" group="3"/>
+        <geom mesh="diff_wheel_0" material="material_diff_wheel_2" class="visual" quat="0.707107 0.707107 0 0"/>
+        <geom mesh="diff_wheel_1" material="material_diff_wheel_1" class="visual" quat="0.707107 0.707107 0 0"/>
+        <geom mesh="diff_wheel_2" material="material_diff_wheel_0" class="visual" quat="0.707107 0.707107 0 0"/>
+      </body>
+      <body name="wheel_right_link" pos="0 -0.317 0.075">
+        <joint name="wheel_right_joint" axis="0 1 0" damping="1" armature="0.05"/>
+        <inertial pos="0 0 0" mass="5.0" diaginertia="0.011 0.011 0.011"/>
+        <geom name="wheel_right_collision" type="sphere" size="0.075" contype="0" conaffinity="1" condim="3" friction="1 0.005 0.0001" rgba="0 0 0 0" group="3"/>
+        <geom mesh="diff_wheel_0" material="material_diff_wheel_2" class="visual" quat="0.707107 0.707107 0 0"/>
+        <geom mesh="diff_wheel_1" material="material_diff_wheel_1" class="visual" quat="0.707107 0.707107 0 0"/>
+        <geom mesh="diff_wheel_2" material="material_diff_wheel_0" class="visual" quat="0.707107 0.707107 0 0"/>
+      </body>
       <geom mesh="nanoscan_3_0" material="material_nanoscan_3_8" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
       <geom mesh="nanoscan_3_1" material="material_nanoscan_3_7" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
       <geom mesh="nanoscan_3_2" material="material_nanoscan_3_6" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
@@ -434,5 +441,7 @@
     <position name="ur5ewrist_2_joint" joint="ur5ewrist_2_joint" kp="2000" dampratio="1.0" ctrlrange="-6.2832 6.2832"/>
     <position name="ur5ewrist_3_joint" joint="ur5ewrist_3_joint" kp="2000" dampratio="1.0" ctrlrange="-6.2832 6.2832"/>
     <position name="robotiq_85_left_knuckle_joint" joint="robotiq_85_left_knuckle_joint" kp="100" dampratio="1.0" ctrlrange="0 0.8"/>
+    <velocity name="wheel_left_joint" joint="wheel_left_joint" kv="50" ctrlrange="-30 30"/>
+    <velocity name="wheel_right_joint" joint="wheel_right_joint" kv="50" ctrlrange="-30 30"/>
   </actuator>
 </mujoco>

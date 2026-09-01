@@ -15,8 +15,10 @@ Move the gripper:
     ros2 action send_goal /gripper_controller/gripper_cmd \
         control_msgs/action/GripperCommand "{command: {position: 0.4, max_effort: 10.0}}"
 
-Drive the base (kinematic, BaseVelocityPlugin):
-    ros2 topic pub -r 10 /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3}, angular: {z: 0.2}}"
+Drive the base (diff_drive_controller; zero stamp is auto-stamped):
+    ros2 topic pub -r 10 /cmd_vel geometry_msgs/msg/TwistStamped \
+        "{twist: {linear: {x: 0.3}, angular: {z: 0.2}}}"
+Keyboard teleop: ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -p stamped:=true
 """
 
 from launch import LaunchDescription
@@ -55,7 +57,6 @@ def generate_launch_description():
     }
 
     controllers_file = PathJoinSubstitution([pkg_share, "config", "controllers.yaml"])
-    mujoco_plugins_file = PathJoinSubstitution([pkg_share, "config", "mujoco_plugins.yaml"])
 
     nodes = [
         Node(
@@ -74,16 +75,8 @@ def generate_launch_description():
             parameters=[
                 {"use_sim_time": True},
                 ParameterFile(controllers_file),
-                ParameterFile(mujoco_plugins_file),
             ],
             on_exit=Shutdown(),
-        ),
-        # odom -> base_link TF from the freejoint odometry.
-        Node(
-            package="mobile_manipulator_simulation",
-            executable="odom_to_tf.py",
-            output="both",
-            parameters=[{"use_sim_time": True}],
         ),
         Node(
             package="rviz2",
@@ -95,12 +88,21 @@ def generate_launch_description():
         ),
     ]
 
-    for controller in ["joint_state_broadcaster", "joint_trajectory_controller", "gripper_controller"]:
+    for controller in [
+        "joint_state_broadcaster",
+        "joint_trajectory_controller",
+        "gripper_controller",
+        "diff_drive_controller",
+    ]:
+        args = [controller, "--param-file", controllers_file]
+        if controller == "diff_drive_controller":
+            # Keep the public topic name: the controller subscribes ~/cmd_vel (TwistStamped).
+            args += ["--controller-ros-args", "-r /diff_drive_controller/cmd_vel:=/cmd_vel"]
         nodes.append(
             Node(
                 package="controller_manager",
                 executable="spawner",
-                arguments=[controller, "--param-file", controllers_file],
+                arguments=args,
                 output="both",
             )
         )

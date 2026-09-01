@@ -52,6 +52,19 @@
       <state_interface name="velocity"/>
     </joint>
 
+    <!-- Drive wheels: MJCF has 1:1 named <velocity> actuators; the velocity command
+         maps directly to ctrl. -->
+    <joint name="wheel_left_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="wheel_right_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
     <!-- Mimic slaves: state-only so joint_state_broadcaster feeds robot_state_publisher.
          MuJoCo equality constraints drive them; MujocoSystemInterface registers them as
          passive (no actuator). -->

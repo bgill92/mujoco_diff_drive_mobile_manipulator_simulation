@@ -6,8 +6,10 @@ Robotiq 2F-85 gripper, controlled through
 
 - **Arm**: `joint_trajectory_controller/JointTrajectoryController` (position)
 - **Gripper**: `position_controllers/GripperActionController`
-- **Base**: kinematic velocity override via `BaseVelocityPlugin` on `/cmd_vel`
-  (a true `diff_drive_controller` with wheel physics is a planned follow-up)
+- **Base**: `diff_drive_controller/DiffDriveController` on `/cmd_vel`
+  (`geometry_msgs/TwistStamped`) — velocity-actuated wheel joints with friction
+  contacts drive the base; the controller integrates encoder odometry and
+  publishes the `odom -> base_link` TF
 
 MuJoCo runs *inside* the patched `ros2_control_node` executable from the
 `mujoco_ros2_control` package. It publishes `/clock`; every node runs with
@@ -64,7 +66,7 @@ In a second terminal:
 
 ```bash
 # Controllers: expect joint_state_broadcaster, joint_trajectory_controller,
-# gripper_controller -- all active
+# gripper_controller, diff_drive_controller -- all active
 pixi run ros2 control list_controllers
 
 # Move the arm (action interface)
@@ -78,23 +80,27 @@ pixi run ros2 action send_goal /joint_trajectory_controller/follow_joint_traject
 pixi run ros2 action send_goal /gripper_controller/gripper_cmd \
   control_msgs/action/GripperCommand "{command: {position: 0.4, max_effort: 10.0}}"
 
-# Drive the base (Ctrl+C stops; base halts within the 0.5 s cmd_timeout)
-pixi run ros2 topic pub -r 10 /cmd_vel geometry_msgs/msg/Twist \
-  "{linear: {x: 0.3}, angular: {z: 0.2}}"
+# Drive the base (Ctrl+C stops; base halts within the 0.5 s cmd_vel_timeout).
+# Zero-stamp TwistStamped messages are auto-stamped by the controller.
+pixi run ros2 topic pub -r 10 /cmd_vel geometry_msgs/msg/TwistStamped \
+  "{twist: {linear: {x: 0.3}, angular: {z: 0.2}}}"
 
-# ... or keyboard teleop
-pixi run ros2 run teleop_twist_keyboard teleop_twist_keyboard
+# ... or keyboard teleop (stamped mode required)
+pixi run ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -p stamped:=true
 
-# Odometry and TF
+# Odometry and TF: encoder odom from the controller, ground truth from MuJoCo
+pixi run ros2 topic echo /diff_drive_controller/odom
 pixi run ros2 topic echo /simulator/floating_base_state
 pixi run ros2 run tf2_ros tf2_echo odom ur5etool0
 ```
 
 Expected behavior:
 
-- The arm tracks the trajectory; swinging it does **not** move the base
-  (the kinematic override is immune to reaction forces).
-- The base slides without wheel spin — wheels are visual-only in this phase.
+- The base drives on its wheels: wheel spin is visible in MuJoCo and RViz, and
+  swinging the arm rocks the base a few mm (reaction forces are real now).
+- Encoder odometry (`/diff_drive_controller/odom`) tracks the MuJoCo ground
+  truth (`/simulator/floating_base_state`) within a few percent; the residual
+  is wheel slip.
 - The base stops within 0.5 s of releasing `/cmd_vel`.
 
 ### Physics-only checks (no ROS)
@@ -105,7 +111,7 @@ cd mobile_manipulator_simulation/description
 # Interactive viewer
 pixi run python -m mujoco.viewer --mjcf=scene.xml
 
-# Settle regression check (run after any converter re-run or MJCF edit)
+# Settle + wheel-traction regression check (run after any converter re-run or MJCF edit)
 pixi run python check_stability.py
 ```
 
@@ -115,9 +121,8 @@ pixi run python check_stability.py
 mobile_manipulator_simulation/   first-party package
   description/                   URDFs, MJCF (scene.xml + generated model),
                                  conversion docs, check_stability.py
-  config/                        controllers.yaml, mujoco_plugins.yaml
+  config/                        controllers.yaml
   launch/                        mujoco_sim.launch.py, view_robot.launch.py
-  scripts/odom_to_tf.py          odom -> base_link TF bridge
 external_packages/
   mujoco_ros2_control/           vendored ros-controls hardware interface
   rox/                           Neobotix ROX description (not built)
