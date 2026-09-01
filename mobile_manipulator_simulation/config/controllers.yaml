@@ -11,12 +11,23 @@ controller_manager:
     gripper_controller:
       type: position_controllers/GripperActionController
 
+    # Teleop fallback (not spawned by default): conflicts with
+    # diff_drive_position_controller over the wheel command interfaces.
     diff_drive_controller:
       type: diff_drive_controller/DiffDriveController
+
+    diff_drive_position_controller:
+      type: diff_drive_position_controller/DiffDrivePositionController
 
 joint_trajectory_controller:
   ros__parameters:
     joints:
+      # Base references chained into diff_drive_position_controller. Exported
+      # interface names must begin with that controller's name, so goals must
+      # use these prefixed joint names too.
+      - diff_drive_position_controller/world_base_link_planar_prismatic_x
+      - diff_drive_position_controller/world_base_link_planar_prismatic_y
+      - diff_drive_position_controller/world_base_link_planar_yaw
       - ur5eshoulder_pan_joint
       - ur5eshoulder_lift_joint
       - ur5eelbow_joint
@@ -34,6 +45,10 @@ joint_trajectory_controller:
     constraints:
       stopped_velocity_tolerance: 0.2
       goal_time: 0.0
+      # Base tolerances are loose: odometry lags the reference during maneuvers.
+      diff_drive_position_controller/world_base_link_planar_prismatic_x: { trajectory: 0.5, goal: 0.05 }
+      diff_drive_position_controller/world_base_link_planar_prismatic_y: { trajectory: 0.5, goal: 0.05 }
+      diff_drive_position_controller/world_base_link_planar_yaw: { trajectory: 0.5, goal: 0.05 }
       ur5eshoulder_pan_joint: { trajectory: 0.2, goal: 0.1 }
       ur5eshoulder_lift_joint: { trajectory: 0.2, goal: 0.1 }
       ur5eelbow_joint: { trajectory: 0.2, goal: 0.1 }
@@ -44,6 +59,19 @@ joint_trajectory_controller:
 gripper_controller:
   ros__parameters:
     joint: robotiq_85_left_knuckle_joint
+
+diff_drive_position_controller:
+  ros__parameters:
+    left_wheel_name: wheel_left_joint
+    right_wheel_name: wheel_right_joint
+    wheel_separation: 0.634
+    wheel_radius: 0.075
+    odom_frame_id: odom
+    base_frame_id: base_link
+    enable_odom_tf: true
+    publish_rate: 50.0
+    max_linear_velocity: 1.5
+    max_angular_velocity: 2.0
 
 diff_drive_controller:
   ros__parameters:

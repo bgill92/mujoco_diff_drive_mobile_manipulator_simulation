@@ -1,0 +1,10 @@
+<library path="diff_drive_position_controller">
+  <class name="diff_drive_position_controller/DiffDrivePositionController"
+         type="diff_drive_position_controller::DiffDrivePositionController"
+         base_class_type="controller_interface::ChainableControllerInterface">
+    <description>
+      Chainable diff-drive controller with planar base joint position reference
+      interfaces, closing the pose loop on wheel-encoder odometry.
+    </description>
+  </class>
+</library>

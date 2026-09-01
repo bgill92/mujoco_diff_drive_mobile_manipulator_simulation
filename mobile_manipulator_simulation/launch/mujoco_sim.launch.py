@@ -4,21 +4,35 @@ Usage:
     ros2 launch mobile_manipulator_simulation mujoco_sim.launch.py
     ros2 launch mobile_manipulator_simulation mujoco_sim.launch.py headless:=true rviz:=false
 
-Move the arm:
+Move the arm (partial goal, arm joints only):
     ros2 action send_goal /joint_trajectory_controller/follow_joint_trajectory \
         control_msgs/action/FollowJointTrajectory "{trajectory: {joint_names: \
         [ur5eshoulder_pan_joint, ur5eshoulder_lift_joint, ur5eelbow_joint, \
         ur5ewrist_1_joint, ur5ewrist_2_joint, ur5ewrist_3_joint], points: \
         [{positions: [0.5, -1.2, 1.0, -0.8, 0.6, 0.3], time_from_start: {sec: 4}}]}}"
 
+Drive the base (chained through diff_drive_position_controller; base joint names
+carry the controller-name prefix because chainable reference interfaces must):
+    ros2 action send_goal /joint_trajectory_controller/follow_joint_trajectory \
+        control_msgs/action/FollowJointTrajectory "{trajectory: {joint_names: \
+        [diff_drive_position_controller/world_base_link_planar_prismatic_x, \
+        diff_drive_position_controller/world_base_link_planar_prismatic_y, \
+        diff_drive_position_controller/world_base_link_planar_yaw], points: \
+        [{positions: [0.5, 0.0, 0.0], time_from_start: {sec: 3}}, \
+        {positions: [1.0, 0.0, 0.785], time_from_start: {sec: 6}}]}}"
+
 Move the gripper:
     ros2 action send_goal /gripper_controller/gripper_cmd \
         control_msgs/action/GripperCommand "{command: {position: 0.4, max_effort: 10.0}}"
 
-Drive the base (diff_drive_controller; zero stamp is auto-stamped):
-    ros2 topic pub -r 10 /cmd_vel geometry_msgs/msg/TwistStamped \
-        "{twist: {linear: {x: 0.3}, angular: {z: 0.2}}}"
-Keyboard teleop: ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -p stamped:=true
+Keyboard teleop (spawn the stock diff_drive_controller instead; it conflicts with
+diff_drive_position_controller over the wheel command interfaces):
+    ros2 control switch_controllers --deactivate joint_trajectory_controller \
+        diff_drive_position_controller
+    ros2 run controller_manager spawner diff_drive_controller \
+        --param-file <controllers.yaml> \
+        --controller-ros-args "-r /diff_drive_controller/cmd_vel:=/cmd_vel"
+    ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -p stamped:=true
 """
 
 from launch import LaunchDescription
@@ -88,21 +102,20 @@ def generate_launch_description():
         ),
     ]
 
+    # diff_drive_position_controller before joint_trajectory_controller: the JTC
+    # chains onto its exported base reference/state interfaces, so it must be
+    # active first (the spawner waits for the chained controller if needed).
     for controller in [
         "joint_state_broadcaster",
+        "diff_drive_position_controller",
         "joint_trajectory_controller",
         "gripper_controller",
-        "diff_drive_controller",
     ]:
-        args = [controller, "--param-file", controllers_file]
-        if controller == "diff_drive_controller":
-            # Keep the public topic name: the controller subscribes ~/cmd_vel (TwistStamped).
-            args += ["--controller-ros-args", "-r /diff_drive_controller/cmd_vel:=/cmd_vel"]
         nodes.append(
             Node(
                 package="controller_manager",
                 executable="spawner",
-                arguments=args,
+                arguments=[controller, "--param-file", controllers_file],
                 output="both",
             )
         )

@@ -1,0 +1,98 @@
+diff_drive_position_controller:
+  reference_joint_names:
+    type: string_array
+    default_value:
+      - world_base_link_planar_prismatic_x
+      - world_base_link_planar_prismatic_y
+      - world_base_link_planar_yaw
+    read_only: true
+    description: "Virtual planar joint names [x, y, yaw] used to name the exported position reference and state interfaces."
+    validation:
+      fixed_size<>: [3]
+  left_wheel_name:
+    type: string
+    default_value: ""
+    read_only: true
+    description: "Left wheel joint name."
+    validation:
+      not_empty<>: null
+  right_wheel_name:
+    type: string
+    default_value: ""
+    read_only: true
+    description: "Right wheel joint name."
+    validation:
+      not_empty<>: null
+  wheel_separation:
+    type: double
+    default_value: 0.0
+    read_only: true
+    description: "Distance between the wheel contact points [m]."
+    validation:
+      gt<>: [0.0]
+  wheel_radius:
+    type: double
+    default_value: 0.0
+    read_only: true
+    description: "Wheel radius [m]."
+    validation:
+      gt<>: [0.0]
+  gains:
+    kx:
+      type: double
+      default_value: 2.0
+      description: "Kanayama gain on the body-frame longitudinal position error [1/s]."
+    ky:
+      type: double
+      default_value: 10.0
+      description: "Kanayama gain on the body-frame lateral position error [1/m^2 per (m/s)]."
+    ktheta:
+      type: double
+      default_value: 3.0
+      description: "Kanayama gain on the heading error [1/s]."
+  enable_feedforward:
+    type: bool
+    default_value: true
+    description: "Finite-difference the position references for velocity feedforward."
+  ff_lowpass_alpha:
+    type: double
+    default_value: 0.1
+    description: "EMA weight for the feedforward low-pass; smaller means smoother."
+    validation:
+      gt<>: [0.0]
+  max_linear_velocity:
+    type: double
+    default_value: 1.5
+    description: "Absolute clamp on the commanded linear velocity [m/s]."
+    validation:
+      gt<>: [0.0]
+  max_angular_velocity:
+    type: double
+    default_value: 2.0
+    description: "Absolute clamp on the commanded angular velocity [rad/s]."
+    validation:
+      gt<>: [0.0]
+  odom_frame_id:
+    type: string
+    default_value: odom
+    description: "Odometry frame id."
+  base_frame_id:
+    type: string
+    default_value: base_link
+    description: "Base frame id."
+  enable_odom_tf:
+    type: bool
+    default_value: true
+    description: "Publish the odom -> base TF."
+  publish_rate:
+    type: double
+    default_value: 50.0
+    description: "Odometry publish rate [Hz]."
+    validation:
+      gt<>: [0.0]
+  velocity_rolling_window_size:
+    type: int
+    default_value: 10
+    description: "Rolling-mean window for the odometry velocity estimate."
+    validation:
+      gt<>: [0]
