@@ -137,265 +137,276 @@
     <material name="material_right_finger_tip_1" specular="0.20000000000000004" shininess="1.0" rgba="0.80000000 0.80000000 0.80000000 1.0"/>
   </asset>
   <worldbody>
-    <body name="ur5eshoulder_link" pos="0.218 0 0.8685" quat="-1 0 0 0">
-      <inertial pos="0 -0.00193 -0.02561" quat="0.560239 0.250606 -0.316559 0.72327" mass="3.761" diaginertia="0.00703079 0.0070003 0.00602478"/>
-      <joint name="ur5eshoulder_pan_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-150 150" damping="10" armature="0.1"/>
-      <body name="ur5eupper_arm_link" quat="0.707107 0.707107 0 0">
-        <inertial pos="-0.2125 0 0.11336" quat="0.500275 0.499641 0.500368 0.499716" mass="8.058" diaginertia="0.333881 0.332472 0.0150588"/>
-        <joint name="ur5eshoulder_lift_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-150 150" damping="10" armature="0.1"/>
-        <body name="ur5eforearm_link" pos="-0.425 0 0">
-          <inertial pos="-0.2422 0 0.0265" quat="0.501301 0.498381 0.510711 0.489375" mass="2.846" diaginertia="0.0787927 0.0785102 0.00397103"/>
-          <joint name="ur5eelbow_joint" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-150 150" damping="10" armature="0.1"/>
-          <body name="ur5ewrist_1_link" pos="-0.3922 0 0.1333">
-            <inertial pos="0 -0.01634 -0.0018" quat="0.960609 0.277707 0.00515042 -0.00913626" mass="1.37" diaginertia="0.00165502 0.00142363 0.00119868"/>
-            <joint name="ur5ewrist_1_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-28 28" damping="5" armature="0.1"/>
-            <body name="ur5ewrist_2_link" pos="0 -0.0997 -2.04488e-11" quat="0.707107 0.707107 0 0">
-              <inertial pos="0 0.01634 -0.0018" quat="0.996652 -0.0779336 -0.00684629 -0.0237381" mass="1.3" diaginertia="0.00135637 0.00128607 0.00095814"/>
-              <joint name="ur5ewrist_2_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-28 28" damping="5" armature="0.1"/>
-              <body name="ur5ewrist_3_link" pos="0 0.0996 -2.04283e-11" quat="0.707107 -0.707107 0 0">
-                <inertial pos="0 2.62607e-05 0.0272671" quat="0.707455 -0.000851825 0.0010799 0.706757" mass="1.0382" diaginertia="0.00129444 0.00120345 0.000679184"/>
-                <joint name="ur5ewrist_3_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-28 28" damping="5" armature="0.1"/>
-                <body name="robotiq_85_left_knuckle_link" pos="0.0306011 0 0.0659045">
-                  <inertial pos="0.0280921 -0.000550523 0.00570126" quat="0.699112 0.212074 0.213677 0.648544" mass="0.0564515" diaginertia="1.95637e-05 1.76663e-05 9.3792e-06"/>
-                  <joint name="robotiq_85_left_knuckle_joint" pos="0 0 0" axis="0 -1 0" range="0 0.8" actuatorfrcrange="-50 50" damping="0.1"/>
-                  <body name="robotiq_85_left_finger_tip_link" pos="0.0371575 0 0.0434217">
-                    <inertial pos="-0.0145671 -0.0008 0.016497" quat="0.977773 0 -0.209665 0" mass="0.0426859" diaginertia="1.20653e-05 1.19789e-05 2.64405e-06"/>
-                    <joint name="robotiq_85_left_finger_tip_joint" pos="0 0 0" axis="0 -1 0" damping="0.1"/>
-                    <geom mesh="left_finger_tip_0" material="material_left_finger_tip_1" class="visual" pos="" quat=""/>
-                    <geom mesh="left_finger_tip_1" material="material_left_finger_tip_0" class="visual" pos="" quat=""/>
-                    <geom mesh="left_finger_tip_0" class="collision" pos="" quat=""/>
-                    <geom mesh="left_finger_tip_1" class="collision" pos="" quat=""/>
-                    <site name="robotiq_85_left_finger_tip_link" pos="0 0 0" quat="1.0 0 0 0"/>
+    <!-- POST-CONVERSION EDIT (see URDF_TO_MJCF_WALKTHROUGH.md): floating base for
+         mujoco_ros2_control. Freejoint name matches odom_free_joint_name default so
+         odometry publishes on /simulator/floating_base_state. Explicit inertial because
+         the fused base geoms lost their URDF mass at mj_saveLastXML time. The frictionless
+         support box rests on the (frictionless) floor so gravity cannot drop the base;
+         BaseVelocityPlugin's qvel override is the sole driver of planar motion. -->
+    <body name="base_link" pos="0 0 0.002">
+      <freejoint name="floating_base_joint"/>
+      <inertial pos="0 0 0.2" mass="90.0" diaginertia="3.0 3.0 5.0"/>
+      <geom name="base_support" type="box" size="0.30 0.24 0.025" pos="0 0 0.025" contype="0" conaffinity="1" condim="1" rgba="1 0 0 0" group="3"/>
+      <body name="ur5eshoulder_link" pos="0.218 0 0.8685" quat="-1 0 0 0">
+        <inertial pos="0 -0.00193 -0.02561" quat="0.560239 0.250606 -0.316559 0.72327" mass="3.761" diaginertia="0.00703079 0.0070003 0.00602478"/>
+        <joint name="ur5eshoulder_pan_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-150 150" damping="10" armature="0.1"/>
+        <body name="ur5eupper_arm_link" quat="0.707107 0.707107 0 0">
+          <inertial pos="-0.2125 0 0.11336" quat="0.500275 0.499641 0.500368 0.499716" mass="8.058" diaginertia="0.333881 0.332472 0.0150588"/>
+          <joint name="ur5eshoulder_lift_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-150 150" damping="10" armature="0.1"/>
+          <body name="ur5eforearm_link" pos="-0.425 0 0">
+            <inertial pos="-0.2422 0 0.0265" quat="0.501301 0.498381 0.510711 0.489375" mass="2.846" diaginertia="0.0787927 0.0785102 0.00397103"/>
+            <joint name="ur5eelbow_joint" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-150 150" damping="10" armature="0.1"/>
+            <body name="ur5ewrist_1_link" pos="-0.3922 0 0.1333">
+              <inertial pos="0 -0.01634 -0.0018" quat="0.960609 0.277707 0.00515042 -0.00913626" mass="1.37" diaginertia="0.00165502 0.00142363 0.00119868"/>
+              <joint name="ur5ewrist_1_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-28 28" damping="5" armature="0.1"/>
+              <body name="ur5ewrist_2_link" pos="0 -0.0997 -2.04488e-11" quat="0.707107 0.707107 0 0">
+                <inertial pos="0 0.01634 -0.0018" quat="0.996652 -0.0779336 -0.00684629 -0.0237381" mass="1.3" diaginertia="0.00135637 0.00128607 0.00095814"/>
+                <joint name="ur5ewrist_2_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-28 28" damping="5" armature="0.1"/>
+                <body name="ur5ewrist_3_link" pos="0 0.0996 -2.04283e-11" quat="0.707107 -0.707107 0 0">
+                  <inertial pos="0 2.62607e-05 0.0272671" quat="0.707455 -0.000851825 0.0010799 0.706757" mass="1.0382" diaginertia="0.00129444 0.00120345 0.000679184"/>
+                  <joint name="ur5ewrist_3_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-28 28" damping="5" armature="0.1"/>
+                  <body name="robotiq_85_left_knuckle_link" pos="0.0306011 0 0.0659045">
+                    <inertial pos="0.0280921 -0.000550523 0.00570126" quat="0.699112 0.212074 0.213677 0.648544" mass="0.0564515" diaginertia="1.95637e-05 1.76663e-05 9.3792e-06"/>
+                    <joint name="robotiq_85_left_knuckle_joint" pos="0 0 0" axis="0 -1 0" range="0 0.8" actuatorfrcrange="-50 50" damping="0.1"/>
+                    <body name="robotiq_85_left_finger_tip_link" pos="0.0371575 0 0.0434217">
+                      <inertial pos="-0.0145671 -0.0008 0.016497" quat="0.977773 0 -0.209665 0" mass="0.0426859" diaginertia="1.20653e-05 1.19789e-05 2.64405e-06"/>
+                      <joint name="robotiq_85_left_finger_tip_joint" pos="0 0 0" axis="0 -1 0" damping="0.1"/>
+                      <geom mesh="left_finger_tip_0" material="material_left_finger_tip_1" class="visual" pos="" quat=""/>
+                      <geom mesh="left_finger_tip_1" material="material_left_finger_tip_0" class="visual" pos="" quat=""/>
+                      <geom mesh="left_finger_tip_0" class="collision" pos="" quat=""/>
+                      <geom mesh="left_finger_tip_1" class="collision" pos="" quat=""/>
+                      <site name="robotiq_85_left_finger_tip_link" pos="0 0 0" quat="1.0 0 0 0"/>
+                    </body>
+                    <geom material="material_left_knuckle_0" mesh="left_knuckle" class="visual" pos="" quat=""/>
+                    <geom mesh="left_knuckle" class="collision" pos="" quat=""/>
+                    <geom mesh="left_finger_0" material="material_left_finger_1" class="visual" pos="0.0315262 0 -0.00376347" quat=""/>
+                    <geom mesh="left_finger_1" material="material_left_finger_0" class="visual" pos="0.0315262 0 -0.00376347" quat=""/>
+                    <geom mesh="left_finger_0" class="collision" pos="0.0315262 0 -0.00376347" quat=""/>
+                    <geom mesh="left_finger_1" class="collision" pos="0.0315262 0 -0.00376347" quat=""/>
+                    <site name="robotiq_85_left_knuckle_link" pos="0 0 0" quat="1.0 0 0 0"/>
+                    <site name="robotiq_85_left_finger_link" pos="0.03152616 0 -0.00376347" quat="1.0 0 0 0"/>
                   </body>
-                  <geom material="material_left_knuckle_0" mesh="left_knuckle" class="visual" pos="" quat=""/>
-                  <geom mesh="left_knuckle" class="collision" pos="" quat=""/>
-                  <geom mesh="left_finger_0" material="material_left_finger_1" class="visual" pos="0.0315262 0 -0.00376347" quat=""/>
-                  <geom mesh="left_finger_1" material="material_left_finger_0" class="visual" pos="0.0315262 0 -0.00376347" quat=""/>
-                  <geom mesh="left_finger_0" class="collision" pos="0.0315262 0 -0.00376347" quat=""/>
-                  <geom mesh="left_finger_1" class="collision" pos="0.0315262 0 -0.00376347" quat=""/>
-                  <site name="robotiq_85_left_knuckle_link" pos="0 0 0" quat="1.0 0 0 0"/>
-                  <site name="robotiq_85_left_finger_link" pos="0.03152616 0 -0.00376347" quat="1.0 0 0 0"/>
-                </body>
-                <body name="robotiq_85_right_knuckle_link" pos="-0.0306011 0 0.0659045">
-                  <inertial pos="-0.0280921 4.48872e-05 0.00570126" quat="0.669099 -0.212862 -0.212522 0.679581" mass="0.0564515" diaginertia="1.95514e-05 1.7665e-05 9.37296e-06"/>
-                  <joint name="robotiq_85_right_knuckle_joint" pos="0 0 0" axis="0 -1 0" range="-0.8 0" actuatorfrcrange="-50 50" damping="0.1"/>
-                  <body name="robotiq_85_right_finger_tip_link" pos="-0.0371575 0 0.0434217">
-                    <inertial pos="0.0145671 5e-05 0.016497" quat="0.977773 0 0.209665 0" mass="0.0426859" diaginertia="1.20653e-05 1.19789e-05 2.64405e-06"/>
-                    <joint name="robotiq_85_right_finger_tip_joint" pos="0 0 0" axis="0 -1 0" damping="0.1"/>
-                    <geom mesh="right_finger_tip_0" material="material_right_finger_tip_1" class="visual" pos="" quat=""/>
-                    <geom mesh="right_finger_tip_1" material="material_right_finger_tip_0" class="visual" pos="" quat=""/>
-                    <geom mesh="right_finger_tip_0" class="collision" pos="" quat=""/>
-                    <geom mesh="right_finger_tip_1" class="collision" pos="" quat=""/>
-                    <site name="robotiq_85_right_finger_tip_link" pos="0 0 0" quat="1.0 0 0 0"/>
+                  <body name="robotiq_85_right_knuckle_link" pos="-0.0306011 0 0.0659045">
+                    <inertial pos="-0.0280921 4.48872e-05 0.00570126" quat="0.669099 -0.212862 -0.212522 0.679581" mass="0.0564515" diaginertia="1.95514e-05 1.7665e-05 9.37296e-06"/>
+                    <joint name="robotiq_85_right_knuckle_joint" pos="0 0 0" axis="0 -1 0" range="-0.8 0" actuatorfrcrange="-50 50" damping="0.1"/>
+                    <body name="robotiq_85_right_finger_tip_link" pos="-0.0371575 0 0.0434217">
+                      <inertial pos="0.0145671 5e-05 0.016497" quat="0.977773 0 0.209665 0" mass="0.0426859" diaginertia="1.20653e-05 1.19789e-05 2.64405e-06"/>
+                      <joint name="robotiq_85_right_finger_tip_joint" pos="0 0 0" axis="0 -1 0" damping="0.1"/>
+                      <geom mesh="right_finger_tip_0" material="material_right_finger_tip_1" class="visual" pos="" quat=""/>
+                      <geom mesh="right_finger_tip_1" material="material_right_finger_tip_0" class="visual" pos="" quat=""/>
+                      <geom mesh="right_finger_tip_0" class="collision" pos="" quat=""/>
+                      <geom mesh="right_finger_tip_1" class="collision" pos="" quat=""/>
+                      <site name="robotiq_85_right_finger_tip_link" pos="0 0 0" quat="1.0 0 0 0"/>
+                    </body>
+                    <geom material="material_right_knuckle_0" mesh="right_knuckle" class="visual" pos="" quat=""/>
+                    <geom mesh="right_knuckle" class="collision" pos="" quat=""/>
+                    <geom mesh="right_finger_0" material="material_right_finger_1" class="visual" pos="-0.0315262 0 -0.00376347" quat=""/>
+                    <geom mesh="right_finger_1" material="material_right_finger_0" class="visual" pos="-0.0315262 0 -0.00376347" quat=""/>
+                    <geom mesh="right_finger_0" class="collision" pos="-0.0315262 0 -0.00376347" quat=""/>
+                    <geom mesh="right_finger_1" class="collision" pos="-0.0315262 0 -0.00376347" quat=""/>
+                    <site name="robotiq_85_right_knuckle_link" pos="0 0 0" quat="1.0 0 0 0"/>
+                    <site name="robotiq_85_right_finger_link" pos="-0.03152616 0 -0.00376347" quat="1.0 0 0 0"/>
                   </body>
-                  <geom material="material_right_knuckle_0" mesh="right_knuckle" class="visual" pos="" quat=""/>
-                  <geom mesh="right_knuckle" class="collision" pos="" quat=""/>
-                  <geom mesh="right_finger_0" material="material_right_finger_1" class="visual" pos="-0.0315262 0 -0.00376347" quat=""/>
-                  <geom mesh="right_finger_1" material="material_right_finger_0" class="visual" pos="-0.0315262 0 -0.00376347" quat=""/>
-                  <geom mesh="right_finger_0" class="collision" pos="-0.0315262 0 -0.00376347" quat=""/>
-                  <geom mesh="right_finger_1" class="collision" pos="-0.0315262 0 -0.00376347" quat=""/>
-                  <site name="robotiq_85_right_knuckle_link" pos="0 0 0" quat="1.0 0 0 0"/>
-                  <site name="robotiq_85_right_finger_link" pos="-0.03152616 0 -0.00376347" quat="1.0 0 0 0"/>
+                  <body name="robotiq_85_left_inner_knuckle_link" pos="0.0127 0 0.07242">
+                    <inertial pos="0.018977 0.00015001 0.022471" quat="0.939613 0 0.342237 0" mass="0.0296938" diaginertia="1.28757e-05 8.69056e-06 4.88712e-06"/>
+                    <joint name="robotiq_85_left_inner_knuckle_joint" pos="0 0 0" axis="0 -1 0" damping="0.1"/>
+                    <geom mesh="left_inner_knuckle_0" material="material_left_inner_knuckle_1" class="visual" pos="" quat=""/>
+                    <geom mesh="left_inner_knuckle_1" material="material_left_inner_knuckle_0" class="visual" pos="" quat=""/>
+                    <geom mesh="left_inner_knuckle_0" class="collision" pos="" quat=""/>
+                    <geom mesh="left_inner_knuckle_1" class="collision" pos="" quat=""/>
+                    <site name="robotiq_85_left_inner_knuckle_link" pos="0 0 0" quat="1.0 0 0 0"/>
+                  </body>
+                  <body name="robotiq_85_right_inner_knuckle_link" pos="-0.0127 0 0.07242">
+                    <inertial pos="-0.0192682 5.001e-05 0.0222218" quat="0.936371 0 -0.351012 0" mass="0.0296938" diaginertia="1.2882e-05 8.69056e-06 4.88076e-06"/>
+                    <joint name="robotiq_85_right_inner_knuckle_joint" pos="0 0 0" axis="0 -1 0" damping="0.1"/>
+                    <geom mesh="right_inner_knuckle_0" material="material_right_inner_knuckle_1" class="visual" pos="" quat=""/>
+                    <geom mesh="right_inner_knuckle_1" material="material_right_inner_knuckle_0" class="visual" pos="" quat=""/>
+                    <geom mesh="right_inner_knuckle_0" class="collision" pos="" quat=""/>
+                    <geom mesh="right_inner_knuckle_1" class="collision" pos="" quat=""/>
+                    <site name="robotiq_85_right_inner_knuckle_link" pos="0 0 0" quat="1.0 0 0 0"/>
+                  </body>
+                  <geom material="material_wrist3_0" mesh="wrist3" class="visual" pos="0 -0.0005 -0.0989" quat="0.707107 0.707107 0 0"/>
+                  <geom mesh="wrist3" class="collision" pos="0 -0.0005 -0.0989" quat="0.707107 0.707107 0 0"/>
+                  <geom mesh="ur_to_robotiq_adapter_0" material="material_ur_to_robotiq_adapter_1" class="visual" pos="" quat="0.707107 0 0 0.707107"/>
+                  <geom mesh="ur_to_robotiq_adapter_1" material="material_ur_to_robotiq_adapter_0" class="visual" pos="" quat="0.707107 0 0 0.707107"/>
+                  <geom mesh="ur_to_robotiq_adapter_0" class="collision" pos="" quat="0.707107 0 0 0.707107"/>
+                  <geom mesh="ur_to_robotiq_adapter_1" class="collision" pos="" quat="0.707107 0 0 0.707107"/>
+                  <geom mesh="robotiq_base_0" material="material_robotiq_base_1" class="visual" pos="0 0 0.011" quat="1 0 0 0"/>
+                  <geom mesh="robotiq_base_1" material="material_robotiq_base_0" class="visual" pos="0 0 0.011" quat="1 0 0 0"/>
+                  <geom mesh="robotiq_base_0" class="collision" pos="0 0 0.011" quat="1 0 0 0"/>
+                  <geom mesh="robotiq_base_1" class="collision" pos="0 0 0.011" quat="1 0 0 0"/>
+                  <site name="ur5ewrist_3_link" pos="0 0 0" quat="1.0 0 0 0"/>
+                  <site name="ur5eft_frame" pos="0 0 0" quat="0 1.0 0 0"/>
+                  <site name="ur5eflange" pos="0 0 0" quat="-0.5000000000000001 0.5 0.5000000000000001 0.49999999999999994"/>
+                  <site name="ur5etool0" pos="0 0 0" quat="1.0 0 0 0"/>
+                  <site name="ur_to_robotiq_link" pos="0 0 0" quat="0.7071067811865476 0 0 0.7071067811865475"/>
+                  <site name="gripper_mount_link" pos="0 0 0.011" quat="0.7071067811865476 0 0 0.7071067811865475"/>
+                  <site name="robotiq_85_base_link" pos="0 0 0.011" quat="1.0 0 0 0"/>
+                  <site name="grasp_link" pos="0 0 0.14500000000000002" quat="0 0 0 1.0"/>
                 </body>
-                <body name="robotiq_85_left_inner_knuckle_link" pos="0.0127 0 0.07242">
-                  <inertial pos="0.018977 0.00015001 0.022471" quat="0.939613 0 0.342237 0" mass="0.0296938" diaginertia="1.28757e-05 8.69056e-06 4.88712e-06"/>
-                  <joint name="robotiq_85_left_inner_knuckle_joint" pos="0 0 0" axis="0 -1 0" damping="0.1"/>
-                  <geom mesh="left_inner_knuckle_0" material="material_left_inner_knuckle_1" class="visual" pos="" quat=""/>
-                  <geom mesh="left_inner_knuckle_1" material="material_left_inner_knuckle_0" class="visual" pos="" quat=""/>
-                  <geom mesh="left_inner_knuckle_0" class="collision" pos="" quat=""/>
-                  <geom mesh="left_inner_knuckle_1" class="collision" pos="" quat=""/>
-                  <site name="robotiq_85_left_inner_knuckle_link" pos="0 0 0" quat="1.0 0 0 0"/>
-                </body>
-                <body name="robotiq_85_right_inner_knuckle_link" pos="-0.0127 0 0.07242">
-                  <inertial pos="-0.0192682 5.001e-05 0.0222218" quat="0.936371 0 -0.351012 0" mass="0.0296938" diaginertia="1.2882e-05 8.69056e-06 4.88076e-06"/>
-                  <joint name="robotiq_85_right_inner_knuckle_joint" pos="0 0 0" axis="0 -1 0" damping="0.1"/>
-                  <geom mesh="right_inner_knuckle_0" material="material_right_inner_knuckle_1" class="visual" pos="" quat=""/>
-                  <geom mesh="right_inner_knuckle_1" material="material_right_inner_knuckle_0" class="visual" pos="" quat=""/>
-                  <geom mesh="right_inner_knuckle_0" class="collision" pos="" quat=""/>
-                  <geom mesh="right_inner_knuckle_1" class="collision" pos="" quat=""/>
-                  <site name="robotiq_85_right_inner_knuckle_link" pos="0 0 0" quat="1.0 0 0 0"/>
-                </body>
-                <geom material="material_wrist3_0" mesh="wrist3" class="visual" pos="0 -0.0005 -0.0989" quat="0.707107 0.707107 0 0"/>
-                <geom mesh="wrist3" class="collision" pos="0 -0.0005 -0.0989" quat="0.707107 0.707107 0 0"/>
-                <geom mesh="ur_to_robotiq_adapter_0" material="material_ur_to_robotiq_adapter_1" class="visual" pos="" quat="0.707107 0 0 0.707107"/>
-                <geom mesh="ur_to_robotiq_adapter_1" material="material_ur_to_robotiq_adapter_0" class="visual" pos="" quat="0.707107 0 0 0.707107"/>
-                <geom mesh="ur_to_robotiq_adapter_0" class="collision" pos="" quat="0.707107 0 0 0.707107"/>
-                <geom mesh="ur_to_robotiq_adapter_1" class="collision" pos="" quat="0.707107 0 0 0.707107"/>
-                <geom mesh="robotiq_base_0" material="material_robotiq_base_1" class="visual" pos="0 0 0.011" quat="1 0 0 0"/>
-                <geom mesh="robotiq_base_1" material="material_robotiq_base_0" class="visual" pos="0 0 0.011" quat="1 0 0 0"/>
-                <geom mesh="robotiq_base_0" class="collision" pos="0 0 0.011" quat="1 0 0 0"/>
-                <geom mesh="robotiq_base_1" class="collision" pos="0 0 0.011" quat="1 0 0 0"/>
-                <site name="ur5ewrist_3_link" pos="0 0 0" quat="1.0 0 0 0"/>
-                <site name="ur5eft_frame" pos="0 0 0" quat="0 1.0 0 0"/>
-                <site name="ur5eflange" pos="0 0 0" quat="-0.5000000000000001 0.5 0.5000000000000001 0.49999999999999994"/>
-                <site name="ur5etool0" pos="0 0 0" quat="1.0 0 0 0"/>
-                <site name="ur_to_robotiq_link" pos="0 0 0" quat="0.7071067811865476 0 0 0.7071067811865475"/>
-                <site name="gripper_mount_link" pos="0 0 0.011" quat="0.7071067811865476 0 0 0.7071067811865475"/>
-                <site name="robotiq_85_base_link" pos="0 0 0.011" quat="1.0 0 0 0"/>
-                <site name="grasp_link" pos="0 0 0.14500000000000002" quat="0 0 0 1.0"/>
+                <geom mesh="wrist2_0" material="material_wrist2_2" class="visual" pos="0 0 -0.0997" quat="1 0 0 0"/>
+                <geom mesh="wrist2_1" material="material_wrist2_1" class="visual" pos="0 0 -0.0997" quat="1 0 0 0"/>
+                <geom mesh="wrist2_2" material="material_wrist2_0" class="visual" pos="0 0 -0.0997" quat="1 0 0 0"/>
+                <geom mesh="wrist2_0" class="collision" pos="0 0 -0.0997" quat="1 0 0 0"/>
+                <geom mesh="wrist2_1" class="collision" pos="0 0 -0.0997" quat="1 0 0 0"/>
+                <geom mesh="wrist2_2" class="collision" pos="0 0 -0.0997" quat="1 0 0 0"/>
+                <site name="ur5ewrist_2_link" pos="0 0 0" quat="1.0 0 0 0"/>
               </body>
-              <geom mesh="wrist2_0" material="material_wrist2_2" class="visual" pos="0 0 -0.0997" quat="1 0 0 0"/>
-              <geom mesh="wrist2_1" material="material_wrist2_1" class="visual" pos="0 0 -0.0997" quat="1 0 0 0"/>
-              <geom mesh="wrist2_2" material="material_wrist2_0" class="visual" pos="0 0 -0.0997" quat="1 0 0 0"/>
-              <geom mesh="wrist2_0" class="collision" pos="0 0 -0.0997" quat="1 0 0 0"/>
-              <geom mesh="wrist2_1" class="collision" pos="0 0 -0.0997" quat="1 0 0 0"/>
-              <geom mesh="wrist2_2" class="collision" pos="0 0 -0.0997" quat="1 0 0 0"/>
-              <site name="ur5ewrist_2_link" pos="0 0 0" quat="1.0 0 0 0"/>
+              <geom mesh="wrist1_0" material="material_wrist1_2" class="visual" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
+              <geom mesh="wrist1_1" material="material_wrist1_1" class="visual" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
+              <geom mesh="wrist1_2" material="material_wrist1_0" class="visual" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
+              <geom mesh="wrist1_0" class="collision" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
+              <geom mesh="wrist1_1" class="collision" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
+              <geom mesh="wrist1_2" class="collision" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
+              <site name="ur5ewrist_1_link" pos="0 0 0" quat="1.0 0 0 0"/>
             </body>
-            <geom mesh="wrist1_0" material="material_wrist1_2" class="visual" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
-            <geom mesh="wrist1_1" material="material_wrist1_1" class="visual" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
-            <geom mesh="wrist1_2" material="material_wrist1_0" class="visual" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
-            <geom mesh="wrist1_0" class="collision" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
-            <geom mesh="wrist1_1" class="collision" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
-            <geom mesh="wrist1_2" class="collision" pos="0 0 -0.127" quat="0.707107 0.707107 0 0"/>
-            <site name="ur5ewrist_1_link" pos="0 0 0" quat="1.0 0 0 0"/>
+            <geom mesh="forearm_0" material="material_forearm_3" class="visual" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
+            <geom mesh="forearm_1" material="material_forearm_2" class="visual" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
+            <geom mesh="forearm_2" material="material_forearm_1" class="visual" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
+            <geom mesh="forearm_3" material="material_forearm_0" class="visual" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
+            <geom mesh="forearm_0" class="collision" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
+            <geom mesh="forearm_1" class="collision" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
+            <geom mesh="forearm_2" class="collision" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
+            <geom mesh="forearm_3" class="collision" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
+            <site name="ur5eforearm_link" pos="0 0 0" quat="1.0 0 0 0"/>
           </body>
-          <geom mesh="forearm_0" material="material_forearm_3" class="visual" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
-          <geom mesh="forearm_1" material="material_forearm_2" class="visual" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
-          <geom mesh="forearm_2" material="material_forearm_1" class="visual" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
-          <geom mesh="forearm_3" material="material_forearm_0" class="visual" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
-          <geom mesh="forearm_0" class="collision" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
-          <geom mesh="forearm_1" class="collision" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
-          <geom mesh="forearm_2" class="collision" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
-          <geom mesh="forearm_3" class="collision" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5"/>
-          <site name="ur5eforearm_link" pos="0 0 0" quat="1.0 0 0 0"/>
+          <geom mesh="upperarm_0" material="material_upperarm_3" class="visual" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
+          <geom mesh="upperarm_1" material="material_upperarm_2" class="visual" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
+          <geom mesh="upperarm_2" material="material_upperarm_1" class="visual" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
+          <geom mesh="upperarm_3" material="material_upperarm_0" class="visual" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
+          <geom mesh="upperarm_0" class="collision" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
+          <geom mesh="upperarm_1" class="collision" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
+          <geom mesh="upperarm_2" class="collision" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
+          <geom mesh="upperarm_3" class="collision" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
+          <site name="ur5eupper_arm_link" pos="0 0 0" quat="1.0 0 0 0"/>
         </body>
-        <geom mesh="upperarm_0" material="material_upperarm_3" class="visual" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
-        <geom mesh="upperarm_1" material="material_upperarm_2" class="visual" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
-        <geom mesh="upperarm_2" material="material_upperarm_1" class="visual" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
-        <geom mesh="upperarm_3" material="material_upperarm_0" class="visual" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
-        <geom mesh="upperarm_0" class="collision" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
-        <geom mesh="upperarm_1" class="collision" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
-        <geom mesh="upperarm_2" class="collision" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
-        <geom mesh="upperarm_3" class="collision" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5"/>
-        <site name="ur5eupper_arm_link" pos="0 0 0" quat="1.0 0 0 0"/>
+        <geom mesh="shoulder_0" material="material_shoulder_2" class="visual" pos="" quat="0 0 0 1"/>
+        <geom mesh="shoulder_1" material="material_shoulder_1" class="visual" pos="" quat="0 0 0 1"/>
+        <geom mesh="shoulder_2" material="material_shoulder_0" class="visual" pos="" quat="0 0 0 1"/>
+        <geom mesh="shoulder_0" class="collision" pos="" quat="0 0 0 1"/>
+        <geom mesh="shoulder_1" class="collision" pos="" quat="0 0 0 1"/>
+        <geom mesh="shoulder_2" class="collision" pos="" quat="0 0 0 1"/>
+        <site name="ur5eshoulder_link" pos="0 0 0" quat="1.0 0 0 0"/>
       </body>
-      <geom mesh="shoulder_0" material="material_shoulder_2" class="visual" pos="" quat="0 0 0 1"/>
-      <geom mesh="shoulder_1" material="material_shoulder_1" class="visual" pos="" quat="0 0 0 1"/>
-      <geom mesh="shoulder_2" material="material_shoulder_0" class="visual" pos="" quat="0 0 0 1"/>
-      <geom mesh="shoulder_0" class="collision" pos="" quat="0 0 0 1"/>
-      <geom mesh="shoulder_1" class="collision" pos="" quat="0 0 0 1"/>
-      <geom mesh="shoulder_2" class="collision" pos="" quat="0 0 0 1"/>
-      <site name="ur5eshoulder_link" pos="0 0 0" quat="1.0 0 0 0"/>
+      <geom mesh="short_frame_0" material="material_short_frame_10" class="visual" pos="" quat=""/>
+      <geom mesh="short_frame_1" material="material_short_frame_9" class="visual" pos="" quat=""/>
+      <geom mesh="short_frame_2" material="material_short_frame_8" class="visual" pos="" quat=""/>
+      <geom mesh="short_frame_3" material="material_short_frame_7" class="visual" pos="" quat=""/>
+      <geom mesh="short_frame_4" material="material_short_frame_6" class="visual" pos="" quat=""/>
+      <geom mesh="short_frame_5" material="material_short_frame_5" class="visual" pos="" quat=""/>
+      <geom mesh="short_frame_6" material="material_short_frame_4" class="visual" pos="" quat=""/>
+      <geom mesh="short_frame_7" material="material_short_frame_3" class="visual" pos="" quat=""/>
+      <geom mesh="short_frame_8" material="material_short_frame_2" class="visual" pos="" quat=""/>
+      <geom mesh="short_frame_9" material="material_short_frame_1" class="visual" pos="" quat=""/>
+      <geom mesh="short_frame_10" material="material_short_frame_0" class="visual" pos="" quat=""/>
+      <geom mesh="short_frame_0" class="collision" pos="" quat=""/>
+      <geom mesh="short_frame_1" class="collision" pos="" quat=""/>
+      <geom mesh="short_frame_2" class="collision" pos="" quat=""/>
+      <geom mesh="short_frame_3" class="collision" pos="" quat=""/>
+      <geom mesh="short_frame_4" class="collision" pos="" quat=""/>
+      <geom mesh="short_frame_5" class="collision" pos="" quat=""/>
+      <geom mesh="short_frame_6" class="collision" pos="" quat=""/>
+      <geom mesh="short_frame_7" class="collision" pos="" quat=""/>
+      <geom mesh="short_frame_8" class="collision" pos="" quat=""/>
+      <geom mesh="short_frame_9" class="collision" pos="" quat=""/>
+      <geom mesh="short_frame_10" class="collision" pos="" quat=""/>
+      <geom mesh="diff_caster_0" material="material_diff_caster_2" class="visual" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_1" material="material_diff_caster_1" class="visual" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_2" material="material_diff_caster_0" class="visual" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_0" class="collision" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_1" class="collision" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_2" class="collision" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_0" material="material_diff_caster_2" class="visual" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_1" material="material_diff_caster_1" class="visual" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_2" material="material_diff_caster_0" class="visual" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_0" class="collision" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_1" class="collision" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_2" class="collision" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_0" material="material_diff_caster_2" class="visual" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_1" material="material_diff_caster_1" class="visual" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_2" material="material_diff_caster_0" class="visual" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_0" class="collision" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_1" class="collision" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_2" class="collision" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_0" material="material_diff_caster_2" class="visual" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_1" material="material_diff_caster_1" class="visual" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_2" material="material_diff_caster_0" class="visual" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_0" class="collision" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_1" class="collision" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_caster_2" class="collision" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
+      <geom mesh="diff_wheel_0" material="material_diff_wheel_2" class="visual" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="diff_wheel_1" material="material_diff_wheel_1" class="visual" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="diff_wheel_2" material="material_diff_wheel_0" class="visual" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="diff_wheel_0" class="collision" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="diff_wheel_1" class="collision" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="diff_wheel_2" class="collision" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="diff_wheel_0" material="material_diff_wheel_2" class="visual" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="diff_wheel_1" material="material_diff_wheel_1" class="visual" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="diff_wheel_2" material="material_diff_wheel_0" class="visual" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="diff_wheel_0" class="collision" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="diff_wheel_1" class="collision" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="diff_wheel_2" class="collision" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
+      <geom mesh="nanoscan_3_0" material="material_nanoscan_3_8" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_1" material="material_nanoscan_3_7" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_2" material="material_nanoscan_3_6" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_3" material="material_nanoscan_3_5" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_4" material="material_nanoscan_3_4" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_5" material="material_nanoscan_3_3" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_6" material="material_nanoscan_3_2" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_7" material="material_nanoscan_3_1" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_8" material="material_nanoscan_3_0" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_0" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_1" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_2" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_3" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_4" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_5" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_6" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_7" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_8" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
+      <geom mesh="nanoscan_3_0" material="material_nanoscan_3_8" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_1" material="material_nanoscan_3_7" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_2" material="material_nanoscan_3_6" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_3" material="material_nanoscan_3_5" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_4" material="material_nanoscan_3_4" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_5" material="material_nanoscan_3_3" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_6" material="material_nanoscan_3_2" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_7" material="material_nanoscan_3_1" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_8" material="material_nanoscan_3_0" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_0" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_1" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_2" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_3" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_4" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_5" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_6" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_7" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="nanoscan_3_8" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
+      <geom mesh="cabinet_ac_0" material="material_cabinet_ac_2" class="visual" pos="0 0 0.33" quat=""/>
+      <geom mesh="cabinet_ac_1" material="material_cabinet_ac_1" class="visual" pos="0 0 0.33" quat=""/>
+      <geom mesh="cabinet_ac_2" material="material_cabinet_ac_0" class="visual" pos="0 0 0.33" quat=""/>
+      <geom mesh="cabinet_ac_0" class="collision" pos="0 0 0.33" quat=""/>
+      <geom mesh="cabinet_ac_1" class="collision" pos="0 0 0.33" quat=""/>
+      <geom mesh="cabinet_ac_2" class="collision" pos="0 0 0.33" quat=""/>
+      <geom mesh="base_0" material="material_base_1" class="visual" pos="0.218 0 0.706" quat="0 0 0 -1"/>
+      <geom mesh="base_1" material="material_base_0" class="visual" pos="0.218 0 0.706" quat="0 0 0 -1"/>
+      <geom mesh="base_0" class="collision" pos="0.218 0 0.706" quat="0 0 0 -1"/>
+      <geom mesh="base_1" class="collision" pos="0.218 0 0.706" quat="0 0 0 -1"/>
+      <site name="base_link" pos="0 0 0" quat="1.0 0 0 0"/>
+      <site name="base_footprint" pos="0 0 0" quat="1.0 0 0 0"/>
+      <site name="caster_wheel_front_right_link" pos="0.2495 -0.22 0.124" quat="1.0 0 0 0"/>
+      <site name="caster_wheel_front_left_link" pos="0.2495 0.22 0.124" quat="1.0 0 0 0"/>
+      <site name="caster_wheel_back_right_link" pos="-0.1595 -0.22 0.124" quat="1.0 0 0 0"/>
+      <site name="caster_wheel_back_left_link" pos="-0.1595 0.22 0.124" quat="1.0 0 0 0"/>
+      <site name="wheel_left_link" pos="0 0.317 0.075" quat="1.0 0 0 0"/>
+      <site name="wheel_right_link" pos="0 -0.317 0.075" quat="1.0 0 0 0"/>
+      <site name="lidar_1_link" pos="0.2995 0.269 0.189" quat="0 0.9238795325112867 0.3826834323650897 0"/>
+      <site name="lidar_2_link" pos="-0.2995 -0.269 0.189" quat="0 -0.3826834323650898 0.9238795325112867 0"/>
+      <site name="cabinet_link" pos="0 0 0.33" quat="1.0 0 0 0"/>
+      <site name="ur5ebase_link" pos="0.218 0 0.706" quat="0 0 0 1.0"/>
+      <site name="ur5ebase_link_inertia" pos="0.218 0 0.706" quat="1.0 0 0 0"/>
+      <site name="ur5ebase" pos="0.218 0 0.706" quat="1.0 0 0 0"/>
     </body>
-    <geom mesh="short_frame_0" material="material_short_frame_10" class="visual" pos="" quat=""/>
-    <geom mesh="short_frame_1" material="material_short_frame_9" class="visual" pos="" quat=""/>
-    <geom mesh="short_frame_2" material="material_short_frame_8" class="visual" pos="" quat=""/>
-    <geom mesh="short_frame_3" material="material_short_frame_7" class="visual" pos="" quat=""/>
-    <geom mesh="short_frame_4" material="material_short_frame_6" class="visual" pos="" quat=""/>
-    <geom mesh="short_frame_5" material="material_short_frame_5" class="visual" pos="" quat=""/>
-    <geom mesh="short_frame_6" material="material_short_frame_4" class="visual" pos="" quat=""/>
-    <geom mesh="short_frame_7" material="material_short_frame_3" class="visual" pos="" quat=""/>
-    <geom mesh="short_frame_8" material="material_short_frame_2" class="visual" pos="" quat=""/>
-    <geom mesh="short_frame_9" material="material_short_frame_1" class="visual" pos="" quat=""/>
-    <geom mesh="short_frame_10" material="material_short_frame_0" class="visual" pos="" quat=""/>
-    <geom mesh="short_frame_0" class="collision" pos="" quat=""/>
-    <geom mesh="short_frame_1" class="collision" pos="" quat=""/>
-    <geom mesh="short_frame_2" class="collision" pos="" quat=""/>
-    <geom mesh="short_frame_3" class="collision" pos="" quat=""/>
-    <geom mesh="short_frame_4" class="collision" pos="" quat=""/>
-    <geom mesh="short_frame_5" class="collision" pos="" quat=""/>
-    <geom mesh="short_frame_6" class="collision" pos="" quat=""/>
-    <geom mesh="short_frame_7" class="collision" pos="" quat=""/>
-    <geom mesh="short_frame_8" class="collision" pos="" quat=""/>
-    <geom mesh="short_frame_9" class="collision" pos="" quat=""/>
-    <geom mesh="short_frame_10" class="collision" pos="" quat=""/>
-    <geom mesh="diff_caster_0" material="material_diff_caster_2" class="visual" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_1" material="material_diff_caster_1" class="visual" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_2" material="material_diff_caster_0" class="visual" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_0" class="collision" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_1" class="collision" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_2" class="collision" pos="0.2495 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_0" material="material_diff_caster_2" class="visual" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_1" material="material_diff_caster_1" class="visual" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_2" material="material_diff_caster_0" class="visual" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_0" class="collision" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_1" class="collision" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_2" class="collision" pos="0.2495 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_0" material="material_diff_caster_2" class="visual" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_1" material="material_diff_caster_1" class="visual" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_2" material="material_diff_caster_0" class="visual" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_0" class="collision" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_1" class="collision" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_2" class="collision" pos="-0.1595 -0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_0" material="material_diff_caster_2" class="visual" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_1" material="material_diff_caster_1" class="visual" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_2" material="material_diff_caster_0" class="visual" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_0" class="collision" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_1" class="collision" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_caster_2" class="collision" pos="-0.1595 0.22 0.124" quat="0.5 -0.5 -0.5 0.5"/>
-    <geom mesh="diff_wheel_0" material="material_diff_wheel_2" class="visual" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="diff_wheel_1" material="material_diff_wheel_1" class="visual" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="diff_wheel_2" material="material_diff_wheel_0" class="visual" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="diff_wheel_0" class="collision" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="diff_wheel_1" class="collision" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="diff_wheel_2" class="collision" pos="0 0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="diff_wheel_0" material="material_diff_wheel_2" class="visual" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="diff_wheel_1" material="material_diff_wheel_1" class="visual" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="diff_wheel_2" material="material_diff_wheel_0" class="visual" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="diff_wheel_0" class="collision" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="diff_wheel_1" class="collision" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="diff_wheel_2" class="collision" pos="0 -0.317 0.075" quat="0.707107 0.707107 0 0"/>
-    <geom mesh="nanoscan_3_0" material="material_nanoscan_3_8" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_1" material="material_nanoscan_3_7" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_2" material="material_nanoscan_3_6" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_3" material="material_nanoscan_3_5" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_4" material="material_nanoscan_3_4" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_5" material="material_nanoscan_3_3" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_6" material="material_nanoscan_3_2" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_7" material="material_nanoscan_3_1" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_8" material="material_nanoscan_3_0" class="visual" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_0" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_1" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_2" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_3" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_4" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_5" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_6" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_7" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_8" class="collision" pos="0.2995 0.269 0.209" quat="-0.92388 0 0 0.382683"/>
-    <geom mesh="nanoscan_3_0" material="material_nanoscan_3_8" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_1" material="material_nanoscan_3_7" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_2" material="material_nanoscan_3_6" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_3" material="material_nanoscan_3_5" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_4" material="material_nanoscan_3_4" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_5" material="material_nanoscan_3_3" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_6" material="material_nanoscan_3_2" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_7" material="material_nanoscan_3_1" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_8" material="material_nanoscan_3_0" class="visual" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_0" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_1" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_2" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_3" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_4" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_5" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_6" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_7" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="nanoscan_3_8" class="collision" pos="-0.2995 -0.269 0.209" quat="0.382683 0 0 0.92388"/>
-    <geom mesh="cabinet_ac_0" material="material_cabinet_ac_2" class="visual" pos="0 0 0.33" quat=""/>
-    <geom mesh="cabinet_ac_1" material="material_cabinet_ac_1" class="visual" pos="0 0 0.33" quat=""/>
-    <geom mesh="cabinet_ac_2" material="material_cabinet_ac_0" class="visual" pos="0 0 0.33" quat=""/>
-    <geom mesh="cabinet_ac_0" class="collision" pos="0 0 0.33" quat=""/>
-    <geom mesh="cabinet_ac_1" class="collision" pos="0 0 0.33" quat=""/>
-    <geom mesh="cabinet_ac_2" class="collision" pos="0 0 0.33" quat=""/>
-    <geom mesh="base_0" material="material_base_1" class="visual" pos="0.218 0 0.706" quat="0 0 0 -1"/>
-    <geom mesh="base_1" material="material_base_0" class="visual" pos="0.218 0 0.706" quat="0 0 0 -1"/>
-    <geom mesh="base_0" class="collision" pos="0.218 0 0.706" quat="0 0 0 -1"/>
-    <geom mesh="base_1" class="collision" pos="0.218 0 0.706" quat="0 0 0 -1"/>
-    <site name="base_link" pos="0 0 0" quat="1.0 0 0 0"/>
-    <site name="base_footprint" pos="0 0 0" quat="1.0 0 0 0"/>
-    <site name="caster_wheel_front_right_link" pos="0.2495 -0.22 0.124" quat="1.0 0 0 0"/>
-    <site name="caster_wheel_front_left_link" pos="0.2495 0.22 0.124" quat="1.0 0 0 0"/>
-    <site name="caster_wheel_back_right_link" pos="-0.1595 -0.22 0.124" quat="1.0 0 0 0"/>
-    <site name="caster_wheel_back_left_link" pos="-0.1595 0.22 0.124" quat="1.0 0 0 0"/>
-    <site name="wheel_left_link" pos="0 0.317 0.075" quat="1.0 0 0 0"/>
-    <site name="wheel_right_link" pos="0 -0.317 0.075" quat="1.0 0 0 0"/>
-    <site name="lidar_1_link" pos="0.2995 0.269 0.189" quat="0 0.9238795325112867 0.3826834323650897 0"/>
-    <site name="lidar_2_link" pos="-0.2995 -0.269 0.189" quat="0 -0.3826834323650898 0.9238795325112867 0"/>
-    <site name="cabinet_link" pos="0 0 0.33" quat="1.0 0 0 0"/>
-    <site name="ur5ebase_link" pos="0.218 0 0.706" quat="0 0 0 1.0"/>
-    <site name="ur5ebase_link_inertia" pos="0.218 0 0.706" quat="1.0 0 0 0"/>
-    <site name="ur5ebase" pos="0.218 0 0.706" quat="1.0 0 0 0"/>
   </worldbody>
   <default>
     <!-- Visual-only model: no geom collides. obj2mjcf leaves some geoms without a class,

@@ -145,3 +145,26 @@ No colcon build needed: `PYTHONPATH` points at the package source so the script'
   ```
 
 - **Accepted limitations**: base welded to world; wheels/casters fixed; zero collision geometry (visual/actuation model — re-enable per-geom `contype`/`conaffinity` if contact physics is ever needed). For a future full ros2_control sim: regenerate the URDF from xacro with `include_arm_ros2_control:=true include_gripper_ros2_control:=true` (or hand-add the block per the `mobile_base.urdf` demo) — that block binds controllers to these MJCF actuators at runtime; the actuators themselves stay defined here.
+
+## Post-conversion step: floating base for mujoco_ros2_control
+
+**Required after every converter re-run** (like `thicken_flat_meshes.py`) — the converter
+welds the URDF root, so this is a hand-edit of `mujoco_description_formatted.xml`:
+
+1. Wrap the entire `<worldbody>` content in a `<body name="base_link" pos="0 0 0.002">`
+   containing, before the existing content:
+   - `<freejoint name="floating_base_joint"/>` — name matches mujoco_ros2_control's
+     `odom_free_joint_name` default, so odometry publishes on
+     `/simulator/floating_base_state` automatically.
+   - `<inertial pos="0 0 0.2" mass="90.0" diaginertia="3.0 3.0 5.0"/>` — the fused base
+     geoms lost their URDF mass at `mj_saveLastXML` time.
+   - `<geom name="base_support" type="box" size="0.30 0.24 0.025" pos="0 0 0.025"
+     contype="0" conaffinity="1" condim="1" rgba="1 0 0 0" group="3"/>` — the only
+     colliding robot geom; rests frictionlessly on the floor so gravity cannot drop the
+     base while BaseVelocityPlugin's qvel override drives planar motion.
+2. `scene.xml`'s floor geom carries `condim="1"` too.
+
+   **Use `condim="1"` for frictionless, never `friction="0 0 0"` with the default
+   `condim="3"`:** zero friction coefficients degenerate the pyramidal friction cone and
+   the default Newton solver explodes within seconds (verified: the whole robot launched
+   itself off the floor). `condim="1"` removes the friction rows entirely.

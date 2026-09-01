@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rox">
+  <xacro:arg name="headless" default="false"/>
+  <xacro:arg name="mujoco_model" default=""/>
+
+  <!-- xacro merges the included <robot>'s children; root link stays base_link
+       (planar world chain already removed), so odom->base_link TF completes the tree. -->
+  <xacro:include filename="$(find mobile_manipulator_simulation)/description/rox_diff_ur5e_mujoco.urdf"/>
+
+  <ros2_control name="MujocoSystem" type="system">
+    <hardware>
+      <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
+      <param name="mujoco_model">$(arg mujoco_model)</param>
+      <param name="headless">$(arg headless)</param>
+      <param name="sim_speed_factor">1.0</param>
+    </hardware>
+
+    <!-- Arm + gripper master: MJCF has 1:1 named <position> actuators. -->
+    <joint name="ur5eshoulder_pan_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="ur5eshoulder_lift_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="ur5eelbow_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="ur5ewrist_1_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="ur5ewrist_2_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="ur5ewrist_3_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="robotiq_85_left_knuckle_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <!-- Mimic slaves: state-only so joint_state_broadcaster feeds robot_state_publisher.
+         MuJoCo equality constraints drive them; MujocoSystemInterface registers them as
+         passive (no actuator). -->
+    <joint name="robotiq_85_right_knuckle_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="robotiq_85_left_inner_knuckle_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="robotiq_85_right_inner_knuckle_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="robotiq_85_left_finger_tip_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="robotiq_85_right_finger_tip_joint">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+</robot>
