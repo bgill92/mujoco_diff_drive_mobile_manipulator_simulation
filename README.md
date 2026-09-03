@@ -132,7 +132,7 @@ pixi run ros2 launch mobile_manipulator_simulation mujoco_sim.launch.py
 # Terminal 2: the generator (honors ROS_DOMAIN_ID from the environment;
 # it must match the sim's domain)
 cd external_packages/whole_body_differential_drive_trajectory_generation
-cargo run --release -- assets/sim_config.yaml
+cargo run --release -- assets/sim_config_l_path.yaml
 ```
 
 The `ros2:` section of the config enables state reading + sending; its
