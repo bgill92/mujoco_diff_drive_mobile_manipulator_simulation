@@ -92,6 +92,14 @@ def generate_launch_description():
             ],
             on_exit=Shutdown(),
         ),
+        # Actual end-effector path from TF, for RViz comparison against the
+        # generator's desired path on /wbdd/desired_ee_path.
+        Node(
+            package="mobile_manipulator_simulation",
+            executable="ee_path_publisher.py",
+            output="both",
+            parameters=[{"use_sim_time": True}],
+        ),
         Node(
             package="rviz2",
             executable="rviz2",

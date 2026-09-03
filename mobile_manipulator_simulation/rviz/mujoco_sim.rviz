@@ -28,6 +28,30 @@ Visualization Manager:
       Enabled: false
       Show Names: true
       Marker Scale: 0.3
+    - Class: rviz_default_plugins/Path
+      Name: DesiredEEPath
+      Enabled: true
+      Topic:
+        Value: /wbdd/desired_ee_path
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Line Style: Billboards
+      Line Width: 0.01
+      Color: 0; 255; 0
+    - Class: rviz_default_plugins/Path
+      Name: ActualEEPath
+      Enabled: true
+      Topic:
+        Value: /actual_ee_path
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+      Line Style: Billboards
+      Line Width: 0.01
+      Color: 255; 0; 0
   Global Options:
     Fixed Frame: odom
     Background Color: 48; 48; 48

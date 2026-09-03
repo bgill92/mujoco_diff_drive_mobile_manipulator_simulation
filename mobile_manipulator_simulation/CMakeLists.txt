@@ -15,6 +15,8 @@ install(FILES
   DESTINATION share/${PROJECT_NAME}/description)
 install(DIRECTORY description/meshes DESTINATION share/${PROJECT_NAME}/description)
 
+install(PROGRAMS scripts/ee_path_publisher.py DESTINATION lib/${PROJECT_NAME})
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
