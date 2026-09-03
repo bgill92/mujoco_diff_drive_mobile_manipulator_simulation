@@ -4,16 +4,50 @@ ROS 2 Jazzy + MuJoCo simulation of a Neobotix ROX base with a UR5e arm and a
 Robotiq 2F-85 gripper, controlled through
 [`mujoco_ros2_control`](https://github.com/ros-controls/mujoco_ros2_control).
 
-- **Arm**: `joint_trajectory_controller/JointTrajectoryController` (position)
+- **Arm + base**: one `joint_trajectory_controller/JointTrajectoryController`
+  (position) owning the 6 arm joints plus 3 virtual base joints chained into
+  `diff_drive_position_controller` (this repo's chainable controller — see its
+  [README](diff_drive_position_controller/README.md)), which closes the base
+  pose loop on wheel-encoder odometry and publishes the `odom -> base_link` TF
 - **Gripper**: `position_controllers/GripperActionController`
-- **Base**: `diff_drive_controller/DiffDriveController` on `/cmd_vel`
-  (`geometry_msgs/TwistStamped`) — velocity-actuated wheel joints with friction
-  contacts drive the base; the controller integrates encoder odometry and
-  publishes the `odom -> base_link` TF
+- **Teleop fallback**: the stock `diff_drive_controller` config is kept for
+  manually spawning on `/cmd_vel` (conflicts with the position controller over
+  the wheel interfaces, so one at a time)
 
 MuJoCo runs *inside* the patched `ros2_control_node` executable from the
 `mujoco_ros2_control` package. It publishes `/clock`; every node runs with
 `use_sim_time: true`.
+
+## TL;DR
+
+Run the whole-body trajectory generator against the sim — the robot spawns at
+the L-shaped path's start configuration and executes it base + arm together:
+
+```bash
+# 1. Install pixi (https://pixi.sh) and Rust (https://rustup.rs)
+
+# 2. Clone with submodules
+git clone --recurse-submodules git@github.com:bgill92/mujoco_diff_drive_mobile_manipulator_simulation.git
+cd mujoco_diff_drive_mobile_manipulator_simulation
+
+# 3. Set up the ROS environment and build
+pixi install
+pixi run bash -c "colcon build --packages-up-to mobile_manipulator_simulation"
+
+# 4. Terminal 1: launch the sim (MuJoCo window + RViz)
+pixi run ros2 launch mobile_manipulator_simulation mujoco_sim.launch.py
+
+# 5. Terminal 2: solve the L path from the robot's measured state and execute it
+cd external_packages/whole_body_differential_drive_trajectory_generation
+cargo run --release -- assets/sim_config_l_path.yaml
+```
+
+The base drives the L while the arm tracks the end-effector waypoints. RViz
+overlays the desired end-effector path (green, published by the generator) on
+the actual one (red, sampled from TF); a Rerun window shows the solved
+trajectory and solver diagnostics. Re-running step 5 replans from wherever
+the robot stopped. The generator inherits `ROS_DOMAIN_ID` from your shell —
+it must match the sim's.
 
 ## Prerequisites
 
