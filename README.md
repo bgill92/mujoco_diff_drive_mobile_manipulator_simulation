@@ -115,6 +115,41 @@ pixi run python -m mujoco.viewer --mjcf=scene.xml
 pixi run python check_stability.py
 ```
 
+## Whole-body trajectory generation
+
+`external_packages/whole_body_differential_drive_trajectory_generation` (Rust,
+cargo-only — no `package.xml`, so colcon never sees it and no COLCON_IGNORE is
+needed) plans base + arm trajectories and sends them to the sim's
+`joint_trajectory_controller` over DDS. It reads the robot's current state
+first (`/joint_states` for the arm, `/diff_drive_position_controller/odom` for
+the base) and plans from it, so re-running it from wherever the robot stopped
+works.
+
+```bash
+# Terminal 1: the sim
+pixi run ros2 launch mobile_manipulator_simulation mujoco_sim.launch.py
+
+# Terminal 2: the generator (honors ROS_DOMAIN_ID from the environment;
+# it must match the sim's domain)
+cd external_packages/whole_body_differential_drive_trajectory_generation
+cargo run --release -- assets/sim_config.yaml
+```
+
+The `ros2:` section of the config enables state reading + sending; its
+`base_joint_name_prefix: "diff_drive_position_controller/"` maps the
+generator's bare base joint names onto the chainable controller's prefixed
+reference interfaces.
+
+Frames: the generator plans in its URDF `world` frame; odometry starts at
+(0, 0, 0) wherever the robot spawns, so the generator's `ros2.world_from_odom`
+config (the spawn pose `[x, y, yaw]` in world) reconciles the two — it lifts
+measured odometry into the world frame and maps outgoing base references back
+into odom. The robot currently spawns at the whole-body L-path start pose
+(base pose in the MJCF `base_link` body, arm in the xacro `initial_value`s,
+both from the generator's `initial_pose` cargo example); the generator's
+`assets/sim_config_l_path.yaml` carries the matching `world_from_odom`. A
+robot spawning at the origin uses the default identity offset.
+
 ## Layout
 
 ```
@@ -123,9 +158,12 @@ mobile_manipulator_simulation/   first-party package
                                  conversion docs, check_stability.py
   config/                        controllers.yaml
   launch/                        mujoco_sim.launch.py, view_robot.launch.py
+diff_drive_position_controller/  chainable position-reference base controller
 external_packages/
   mujoco_ros2_control/           vendored ros-controls hardware interface
   rox/                           Neobotix ROX description (not built)
+  whole_body_differential_drive_trajectory_generation/
+                                 Rust whole-body trajectory generator (cargo)
 ```
 
 See `mobile_manipulator_simulation/description/URDF_TO_MJCF_WALKTHROUGH.md`

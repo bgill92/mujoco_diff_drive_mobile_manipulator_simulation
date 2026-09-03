@@ -102,23 +102,26 @@ def generate_launch_description():
         ),
     ]
 
-    # diff_drive_position_controller before joint_trajectory_controller: the JTC
-    # chains onto its exported base reference/state interfaces, so it must be
-    # active first (the spawner waits for the chained controller if needed).
-    for controller in [
-        "joint_state_broadcaster",
-        "diff_drive_position_controller",
-        "joint_trajectory_controller",
-        "gripper_controller",
-    ]:
-        nodes.append(
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=[controller, "--param-file", controllers_file],
-                output="both",
-            )
+    # One spawner, controllers in dependency order: the JTC chains onto
+    # diff_drive_position_controller's exported base reference interfaces, so
+    # that controller must activate first. Separate spawner processes race
+    # (observed: JTC activation failing on the not-yet-available reference
+    # interface); a single spawner activates strictly in argument order.
+    nodes.append(
+        Node(
+            package="controller_manager",
+            executable="spawner",
+            arguments=[
+                "joint_state_broadcaster",
+                "diff_drive_position_controller",
+                "joint_trajectory_controller",
+                "gripper_controller",
+                "--param-file",
+                controllers_file,
+            ],
+            output="both",
         )
+    )
 
     return LaunchDescription(
         [

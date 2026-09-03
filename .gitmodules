@@ -6,3 +6,6 @@
 	path = external_packages/mujoco_ros2_control
 	url = git@github.com:ros-controls/mujoco_ros2_control.git
 	branch = main
+[submodule "external_packages/whole_body_differential_drive_trajectory_generation"]
+	path = external_packages/whole_body_differential_drive_trajectory_generation
+	url = git@github.com:bgill92/whole_body_differential_drive_trajectory_generation.git
