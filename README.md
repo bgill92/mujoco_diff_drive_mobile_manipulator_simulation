@@ -18,6 +18,13 @@ MuJoCo runs *inside* the patched `ros2_control_node` executable from the
 `mujoco_ros2_control` package. It publishes `/clock`; every node runs with
 `use_sim_time: true`.
 
+![MuJoCo sim executing the L-shaped whole-body trajectory — desired
+end-effector path in green, actual in red](docs/demo.gif)
+
+*The sim executing the L-shaped whole-body trajectory at 2× speed: desired
+end-effector path in green, actual (traced from the `grasp_link` site) in red.
+Regenerate with [`scripts/render_replay.py`](scripts/render_replay.py).*
+
 ## TL;DR
 
 Run the whole-body trajectory generator against the sim — the robot spawns at
