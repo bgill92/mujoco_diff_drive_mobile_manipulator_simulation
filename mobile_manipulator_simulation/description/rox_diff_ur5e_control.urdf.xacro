@@ -15,35 +15,50 @@
       <param name="sim_speed_factor">1.0</param>
     </hardware>
 
-    <!-- Arm + gripper master: MJCF has 1:1 named <position> actuators. -->
+    <!-- Arm + gripper master: MJCF has 1:1 named <position> actuators.
+         initial_value = the whole-body L-path start configuration (solved by
+         the initial_pose cargo example in the trajectory generator repo);
+         the matching base spawn pose lives in the MJCF base_link body. -->
     <joint name="ur5eshoulder_pan_joint">
       <command_interface name="position"/>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">-1.570790</param>
+      </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="ur5eshoulder_lift_joint">
       <command_interface name="position"/>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">-1.436824</param>
+      </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="ur5eelbow_joint">
       <command_interface name="position"/>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">1.570790</param>
+      </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="ur5ewrist_1_joint">
       <command_interface name="position"/>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">1.435491</param>
+      </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="ur5ewrist_2_joint">
       <command_interface name="position"/>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">1.570792</param>
+      </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="ur5ewrist_3_joint">
       <command_interface name="position"/>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">-1.570790</param>
+      </state_interface>
       <state_interface name="velocity"/>
     </joint>
     <joint name="robotiq_85_left_knuckle_joint">
