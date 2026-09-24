@@ -211,3 +211,9 @@ See `mobile_manipulator_simulation/description/URDF_TO_MJCF_WALKTHROUGH.md`
 for the URDF→MJCF conversion record, including the required post-conversion
 floating-base edit (and why frictionless geoms must use `condim="1"`, never
 `friction="0 0 0"`).
+
+## License
+
+Apache-2.0 (see [LICENSE](LICENSE)). Copied meshes and the odometry code carry
+their upstream BSD / Apache-2.0 notices; see
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
